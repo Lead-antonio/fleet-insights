@@ -27,12 +27,12 @@ export function AppSidebar() {
     <Sidebar className="border-r border-sidebar-border">
       <SidebarHeader className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center">
-            <Car className="w-6 h-6 text-white" />
-          </div>
+          {/* <div className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center"> */}
+            {/* <Car className="w-6 h-6 text-white" /> */}
+            <img className="w-10 h-10" src="/icon.png" alt="" />
           <div>
-            <h1 className="font-bold text-lg text-sidebar-foreground">FleetManager</h1>
-            <p className="text-xs text-sidebar-foreground/60">Pro Edition</p>
+            <h1 className="font-bold text-lg text-sidebar-foreground">M-TEC</h1>
+            <p className="text-xs text-sidebar-foreground/60">Fleet Master</p>
           </div>
         </div>
       </SidebarHeader>

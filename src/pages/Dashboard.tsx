@@ -16,7 +16,7 @@ const Dashboard = () => {
     <div className="space-y-6 animate-fade-in">
       <div>
         <h1 className="text-3xl font-bold text-foreground">{t.nav.dashboard}</h1>
-        <p className="text-muted-foreground">FleetManager Pro - {t.tabs.fleet}</p>
+        <p className="text-muted-foreground">Fleet Master - {t.tabs.fleet}</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
