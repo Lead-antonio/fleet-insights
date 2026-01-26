@@ -1,9 +1,30 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './users/entity/users.entity';
 
 @Module({
-  imports: [],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule], // importe ConfigModule pour l’injection
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        type: 'mysql',
+        host: config.get<string>('DB_HOST', '127.0.0.1'),
+        port: +config.get<number>('DB_PORT', 3306),
+        username: config.get<string>('DB_USERNAME', 'root'), 
+        password: config.get<string>('DB_PASSWORD', ''), 
+        database: config.get<string>('DB_DATABASE', ''),
+        entities: [User],
+        synchronize: true,
+      }),
+    }),
+    AuthModule, UsersModule],
   controllers: [AppController],
   providers: [AppService],
 })
