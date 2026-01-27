@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, BadRequestException, UnauthorizedException, NotFoundException } from '@nestjs/common';
 import { User } from './entity/users.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -17,6 +17,14 @@ export class UsersService {
     }
 
     async create(createUserDto: CreateUserDto): Promise<User> {
+        const exists = await this.usersRepository.findOne({
+            where: { email: createUserDto.email },
+        });
+
+        if (exists) {
+            throw new ConflictException('Email already exists');
+        }
+
         const user = new User();
         user.email = createUserDto.email;
         user.full_name = createUserDto.full_name;
@@ -45,6 +53,18 @@ export class UsersService {
         return users.map(({ password, ...rest }) => rest);
     }
 
+     async findById(id: number): Promise<User> {
+        const user = await this.usersRepository.findOne({
+            where: { id },
+        });
+
+        if (!user) {
+        throw new NotFoundException('Utilisateur introuvable');
+        }
+
+        return user;
+    }
+
     async findOne(id: number): Promise<User | null> {
         return this.usersRepository.findOne({ 
             where: { id },
@@ -56,15 +76,35 @@ export class UsersService {
         await this.usersRepository.delete(id);
     }
 
-    async updatePassword(userId: number, newHashedPassword: string): Promise<void> {
-        const user = await this.usersRepository.findOne({ where: { id: userId } });
+    async updateProfile(userId: number, data: Partial<User>) {
+        await this.usersRepository.update(userId, data);
+        return this.usersRepository.findOne({ where: { id: userId } });
+    }
+
+    
+    async changePassword(userId: number, currentPassword: string, newPassword: string) {
+        const user = await this.usersRepository.findOne({
+            where: { id: userId },
+        });
 
         if (!user) {
-        throw new NotFoundException('Utilisateur non trouvé');
+            throw new UnauthorizedException();
         }
 
-        user.password = newHashedPassword;
+        const isSamePassword = await bcrypt.compare(newPassword, user.password);
+        if (isSamePassword) {
+            throw new BadRequestException('New password must be different from the current password');
+        }
 
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            throw new BadRequestException('Current password is incorrect');
+        }
+
+        user.password = await bcrypt.hash(newPassword, 10);
+        user.password_changed_at = new Date();
         await this.usersRepository.save(user);
+
+        return { message: 'Password updated successfully' };
     }
 }

@@ -16,4 +16,8 @@ export class User {
 
   @Column({ default: false})
   is_active: boolean;
+
+  @Column({ type: 'timestamp', nullable: true })
+  password_changed_at: Date;
+
 }

@@ -15,9 +15,6 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req) {
-    const payload = { email: req.user.email, sub: req.user.id };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
+    return this.authService.login(req.user);
   }
 }

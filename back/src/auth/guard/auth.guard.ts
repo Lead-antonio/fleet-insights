@@ -9,10 +9,11 @@ import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from 'src/common/decarators/public.decorator';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService, private reflector: Reflector) {}
+  constructor(private jwtService: JwtService, private reflector: Reflector, private usersService: UsersService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     // Vérifie si la route est décorée @Public()
@@ -28,11 +29,17 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException();
     }
     try {
-      // 💡 Here the JWT secret key that's used for verifying the payload 
-      // is the key that was passsed in the JwtModule
       const payload = await this.jwtService.verifyAsync(token);
-      // 💡 We're assigning the payload to the request object here
-      // so that we can access it in our route handlers
+
+      const user = await this.usersService.findById(payload.sub);
+
+      if (
+        user.password_changed_at &&
+        payload.iat * 1000 < user.password_changed_at.getTime()
+      ) {
+        throw new UnauthorizedException('Token expired');
+      }
+
       request['user'] = payload;
     } catch {
       throw new UnauthorizedException();
