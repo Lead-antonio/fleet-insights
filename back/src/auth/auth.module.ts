@@ -6,12 +6,22 @@ import { UsersModule } from 'src/users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { LocalStrategy } from './guard/local.strategy';
-import { AuthGuard } from 'src/auth/guard/auth.guard';
+import { LocalStrategy } from './guards/local.strategy';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { APP_GUARD } from '@nestjs/core/constants';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from 'src/users/entity/users.entity';
+import { PasswordResetToken } from './entity/password-reset-token.entity';
+import { MailModule } from 'src/mail/mail.module';
+import { MailService } from 'src/mail/mail.service';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([
+      PasswordResetToken,
+      User,
+    ]),
+    MailModule,
     UsersModule,
     PassportModule,
     JwtModule.registerAsync({
@@ -27,7 +37,7 @@ import { APP_GUARD } from '@nestjs/core/constants';
       },
     }),
   ],
-  providers: [AuthService, LocalStrategy ,UsersService,  {
+  providers: [AuthService, LocalStrategy ,UsersService, MailService, {
       provide: APP_GUARD,
       useClass: AuthGuard,
     }],

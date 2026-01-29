@@ -1,10 +1,10 @@
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Put, Req } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto } from './dtos/create-user.dto';
 import { UsersService } from './users.service';
 import { Public } from 'src/common/decarators/public.decorator';
 import { GetUser } from './decorators/get-user-decorator';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdateUserDto } from './dtos/update-user.dto';
+import { ChangePasswordDto } from './dtos/change-password.dto';
 
 @Controller('users')
 export class UsersController {
@@ -28,12 +28,12 @@ export class UsersController {
     return this.usersService.findOneWithRoleAndPermissions(user.userId);
   }
 
-  @Put('update/profile')
+  @Put('update-profile')
   updateProfile(@Req() req, @Body() dto: UpdateUserDto) {
     return this.usersService.updateProfile(req.user.sub, dto);
   }
 
-  @Put('change/password')
+  @Put('change-password')
   changePassword(@Req() req, @Body() dto: ChangePasswordDto) {
     return this.usersService.changePassword(
       req.user.sub, // depuis le JWT
