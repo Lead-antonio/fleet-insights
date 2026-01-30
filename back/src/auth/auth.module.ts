@@ -29,10 +29,9 @@ import { MailService } from 'src/mail/mail.service';
       inject: [ConfigService],
       useFactory: (config: ConfigService): JwtModuleOptions => {
         const secret = config.get<string>('JWT_SECRET') ?? 'default_secret';
-        const expiresIn: number = Number(config.get('JWT_EXPIRES_IN_SECONDS')) || 86400;
         return {
           secret,
-          signOptions: { expiresIn },
+          signOptions: { expiresIn: '1h' },
         };
       },
     }),

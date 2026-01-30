@@ -4,17 +4,17 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dtos/create-user.dto';
 import * as bcrypt from 'bcrypt';
+import { Role } from 'src/roles/entity/role.entity';
 
 @Injectable()
 export class UsersService {
     constructor(
         @InjectRepository(User)
         private usersRepository: Repository<User>,
-    ) {}
 
-    findByEmail(email: string): Promise<User | null> {
-        return this.usersRepository.findOne({ where: { email } });
-    }
+        @InjectRepository(Role)
+        private rolesRepository: Repository<Role>,
+    ) {}
 
     async create(createUserDto: CreateUserDto): Promise<User> {
         const exists = await this.usersRepository.findOne({
@@ -36,12 +36,8 @@ export class UsersService {
         return this.usersRepository.save(user);
     }
 
-
-    async findOneWithRoleAndPermissions(userId: number) {
-        return this.usersRepository.findOne({
-            where: { id: userId },
-            // relations: ['role'], 
-        });
+    findByEmail(email: string): Promise<User | null> {
+        return this.usersRepository.findOne({ where: { email } });
     }
 
     async findAll(): Promise<Omit<User, 'password'>[]> {
@@ -53,7 +49,7 @@ export class UsersService {
         return users.map(({ password, ...rest }) => rest);
     }
 
-     async findById(id: number): Promise<User> {
+    async findById(id: number): Promise<User> {
         const user = await this.usersRepository.findOne({
             where: { id },
         });
@@ -106,5 +102,24 @@ export class UsersService {
         await this.usersRepository.save(user);
 
         return { message: 'Password updated successfully' };
+    }
+
+    async getUserPermissions(userId: number): Promise<string[]> {
+        const user = await this.usersRepository.findOne({
+            where: { id: userId },
+            relations: ['role', 'role.permissions'],
+        });
+
+        if (!user || !user.role) return [];
+
+        return user.role.permissions.map(p => p.name);
+    }
+
+    // src/users/users.service.ts
+    async findOneWithRoleAndPermissions(userId: number) {
+        return this.usersRepository.findOne({
+            where: { id: userId },
+            relations: ['role'], 
+        });
     }
 }

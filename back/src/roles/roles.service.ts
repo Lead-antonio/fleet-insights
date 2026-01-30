@@ -6,6 +6,7 @@ import { Repository } from 'typeorm/repository/Repository';
 import { CreateRoleDto } from './dtos/create-role.dto';
 import { Permission } from 'src/permissions/entity/permission.entity';
 import { Role } from './entity/role.entity';
+import { PermissionsService } from 'src/permissions/permissions.service';
 
 @Injectable()
 export class RolesService {
@@ -14,6 +15,7 @@ export class RolesService {
     private readonly roleRepo: Repository<Role>,
     @InjectRepository(Permission)
     private readonly permissionRepo: Repository<Permission>,
+    private permissionsService: PermissionsService,
   ) {}
 
   async create(dto: CreateRoleDto) {
@@ -31,7 +33,7 @@ export class RolesService {
 
     if (dto.permissionIds?.length) {
         const permissions = await this.permissionRepo.findBy({
-        id: In(dto.permissionIds),
+          id: In(dto.permissionIds),
         });
 
         if (permissions.length !== dto.permissionIds.length) {
@@ -44,27 +46,37 @@ export class RolesService {
     return this.roleRepo.save(role);
   }
 
-  findAll() {
+  async findAll():  Promise<Role[]> {
     return this.roleRepo.find({ relations: ['permissions'] });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number):  Promise<Role> {
     const role = await this.roleRepo.findOne({
       where: { id },
       relations: ['permissions'],
     });
 
-    if (!role) throw new NotFoundException('Role not found');
+    if (!role) {
+      throw new NotFoundException(`Le rôle avec l'id ${id} n'existe pas`);
+    }
     return role;
   }
 
   async update(id: number, dto: UpdateRoleDto) {
-    const role = await this.findOne(id);
+    const role = await this.roleRepo.findOne({
+      where: { id: id },
+      relations: ['permissions'],
+    });
+
+    if (!role) {
+      throw new NotFoundException('Rôle non trouvé');
+    }
 
     if (dto.permissionIds) {
-      role.permissions = await this.permissionRepo.findBy({
+      const permissions = await this.permissionRepo.findBy({
         id: In(dto.permissionIds),
       });
+      role.permissions = [...role.permissions, ...permissions];
     }
 
     if (dto.name) role.name = dto.name;
@@ -75,5 +87,25 @@ export class RolesService {
   async remove(id: number) {
     const role = await this.findOne(id);
     return this.roleRepo.remove(role);
+  }
+
+  async syncAdminPermissions() {
+    const adminRole = await this.roleRepo.findOne({
+      where: { name: 'Admin' },
+      relations: ['permissions'], // charge les permissions existantes
+    });
+
+    if (!adminRole) {
+      throw new NotFoundException('Le rôle admin est introuvable');
+    }
+
+    // Récupérer toutes les permissions existantes
+    const allPermissions = await this.permissionsService.findAll();
+
+    // Attribuer toutes les permissions au rôle admin
+    adminRole.permissions = allPermissions;
+
+    // Sauvegarder le rôle avec ses nouvelles permissions
+    await this.roleRepo.save(adminRole);
   }
 }
