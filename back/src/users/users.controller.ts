@@ -29,7 +29,6 @@ export class UsersController {
     };
   }
 
-
   @Get('me/permissions')
   async getMyPermissions(@Req() req: RequestWithUser) {
     const userId = req.user.userId;
