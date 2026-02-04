@@ -1,8 +1,9 @@
+import { BaseEntity } from 'src/common/entity/base.entity';
 import { Role } from 'src/roles/entity/role.entity';
-import { Entity, Column, PrimaryGeneratedColumn, JoinTable, ManyToMany, JoinColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, JoinColumn, ManyToOne } from 'typeorm';
 
 @Entity('users')
-export class User {
+export class User extends BaseEntity{
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -24,5 +25,4 @@ export class User {
   @ManyToOne(() => Role, { eager: true, nullable: true })
   @JoinColumn()
   role: Role;
-
 }

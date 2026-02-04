@@ -10,6 +10,12 @@ import { RolesModule } from './roles/roles.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { Role } from './roles/entity/role.entity';
 import { Permission } from './permissions/entity/permission.entity';
+import { CustomersModule } from './customers/customers.module';
+import { VehiculeTypesModule } from './vehicule-types/vehicule-types.module';
+import { VehiculesModule } from './vehicules/vehicules.module';
+import { Customer } from './customers/entity/customer.entity';
+import { VehiculeType } from './vehicule-types/entity/vehicule-type.entity';
+import { Vehicule } from './vehicules/entity/vehicule.entity';
 
 @Module({
   imports: [
@@ -24,11 +30,11 @@ import { Permission } from './permissions/entity/permission.entity';
         username: config.get<string>('DB_USERNAME', 'root'), 
         password: config.get<string>('DB_PASSWORD', ''), 
         database: config.get<string>('DB_DATABASE', ''),
-        entities: [User, Role, Permission],
+        entities: [User, Role, Permission, Customer, VehiculeType, Vehicule],
         synchronize: true,
       }),
     }),
-    AuthModule, UsersModule, RolesModule, PermissionsModule],
+    AuthModule, UsersModule, RolesModule, PermissionsModule, CustomersModule, VehiculeTypesModule, VehiculesModule],
   controllers: [AppController],
   providers: [AppService],
 })
