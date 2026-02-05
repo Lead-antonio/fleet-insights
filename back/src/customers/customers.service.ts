@@ -32,7 +32,12 @@ export class CustomersService {
   }
 
   async findAll(): Promise<Customer[]> {
-    return await this.customerRepo.find();
+    const customers = await this.customerRepo.find();
+    if(!customers || customers.length === 0){
+      throw new NotFoundException('No customers found');
+    }
+    
+    return customers;
   }
 
   async findOne(id: number): Promise<Customer> {
