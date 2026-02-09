@@ -1,1 +1,4 @@
-export class CreateVehiculeDto {}
+import { IsString } from "class-validator";
+
+export class CreateVehiculeDto {
+}
