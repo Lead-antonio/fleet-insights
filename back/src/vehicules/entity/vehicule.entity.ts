@@ -13,6 +13,9 @@ export class Vehicule extends BaseEntity {
     @Column({ unique: true })
     matricule: string;
 
+    @Column({ unique: true })
+    imei: string;
+
     @Column({ nullable: true })
     photo_url: string;
     
