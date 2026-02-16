@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { AuthProvider } from "@/contexts/AuthContext";
 import Dashboard from "./pages/Dashboard";
 import Vehicles from "./pages/Vehicles";
 import Settings from "./pages/Settings";
@@ -21,15 +23,21 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route element={<SidebarProvider><AppLayout /></SidebarProvider>}>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/vehicles" element={<Vehicles />} />
-              <Route path="/settings" element={<Settings />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AuthProvider>
+              <Routes>
+                <Route path="/login" element={<Login />} />
+
+                <Route element={<ProtectedRoute />}>
+                  <Route element={<SidebarProvider><AppLayout /></SidebarProvider>}>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/vehicles" element={<Vehicles />} />
+                    <Route path="/settings" element={<Settings />} />
+                  </Route>
+                </Route>
+                
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+          </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
     </LanguageProvider>

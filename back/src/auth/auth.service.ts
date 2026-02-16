@@ -34,17 +34,65 @@ export class AuthService {
         return result;
     }
 
-    login(user: any) {
+    // login(user: any) {
+    //     const payload = {
+    //         sub: user.id,
+    //         email: user.email,
+    //         iat: Math.floor(Date.now() / 1000),
+    //     };
+
+    //     return {
+    //         access_token: this.jwtService.sign(payload),
+    //     };
+    // }
+
+    async login(user: any) {
         const payload = {
             sub: user.id,
             email: user.email,
-            iat: Math.floor(Date.now() / 1000),
         };
 
+        const accessToken = this.jwtService.sign(payload, {
+            secret: process.env.JWT_SECRET,
+            expiresIn: '15m',
+        });
+
+        const refreshToken = this.jwtService.sign(payload, {
+            secret: process.env.JWT_REFRESH_SECRET,
+            expiresIn: '7d',
+        });
+
         return {
-            access_token: this.jwtService.sign(payload),
+            access_token: accessToken,
+            refresh_token: refreshToken,
         };
     }
+
+    async refresh(refreshToken: string) {
+        try {
+            const payload = this.jwtService.verify(refreshToken, {
+             secret: process.env.JWT_REFRESH_SECRET,
+            });
+
+            const newAccessToken = this.jwtService.sign(
+            {
+                sub: payload.sub,
+                email: payload.email,
+            },
+            {
+                secret: process.env.JWT_SECRET,
+                expiresIn: '15m',
+            },
+            );
+
+            return {
+                access_token: newAccessToken,
+            };
+        } catch (e) {
+            throw new UnauthorizedException('Invalid refresh token');
+        }
+    }
+
 
     async forgotPassword(email: string) {
         const user = await this.usersService.findByEmail(email);

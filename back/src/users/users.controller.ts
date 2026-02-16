@@ -41,14 +41,23 @@ export class UsersController {
     };
   }
 
-  @Get('me')
+  @Get('profile')
   async getProfile(@GetUser() user: any) {
-    const profile = await this.usersService.findOneWithRoleAndPermissions(user.userId);
-
+    const profile = await this.usersService.findOneWithRoleAndPermissions(user.sub);
+    if (!profile) {
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Profil non trouvé',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    const { password, ...safeUser } = profile;
     return {
       status: 200,
       message: 'Profil récupéré avec succès',
-      response: profile,
+        response: safeUser,
     };
   }
 
