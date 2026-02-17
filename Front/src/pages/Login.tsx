@@ -48,10 +48,10 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/20 via-background to-accent/20 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          {/* <div className="mx-auto w-16 h-16 rounded-xl gradient-primary flex items-center justify-center mb-4"> */}
-            <img className="mx-auto w-20 h-20" src="/fleet.png" alt="" />
-          {/* </div> */}
-          {/* <CardTitle className="text-2xl">M-tec Fleet Master</CardTitle> */}
+          <div className="mx-auto w-16 h-16 rounded-xl gradient-primary flex items-center justify-center mb-4">
+            {/* <img className="mx-auto w-20 h-20" src="/fleet.png" alt="" /> */}
+          </div>
+          <CardTitle className="text-2xl">M-tec Fleet Master</CardTitle>
           <CardDescription>{t.login.subtitle}</CardDescription>
         </CardHeader>
         <CardContent>

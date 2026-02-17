@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dtos/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { Role } from 'src/roles/entity/role.entity';
+import { UpdateUserDto } from './dtos/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -27,7 +28,11 @@ export class UsersService {
 
         const user = new User();
         user.email = createUserDto.email;
-        user.full_name = createUserDto.full_name;
+        user.first_name = createUserDto.first_name;
+        user.last_name = createUserDto.last_name;
+        user.number = createUserDto.number;
+        user.country = createUserDto.country;
+        user.state = createUserDto.state;
         user.is_active = false; 
         
         const salt = await bcrypt.genSalt();
@@ -72,9 +77,19 @@ export class UsersService {
         await this.usersRepository.delete(id);
     }
 
-    async updateProfile(userId: number, data: Partial<User>) {
-        await this.usersRepository.update(userId, data);
-        return this.usersRepository.findOne({ where: { id: userId } });
+    async updateProfile(userId: number, dto: UpdateUserDto) {
+        await this.usersRepository.update(userId, dto);
+
+        const updatedUser = await this.usersRepository.findOne({
+            where: { id: userId },
+            relations: ['role', 'role.permissions'],
+        });
+
+        if (!updatedUser) return null;
+
+        const { password, ...result } = updatedUser;
+
+        return result;
     }
 
     

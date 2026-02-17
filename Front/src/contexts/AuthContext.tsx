@@ -10,11 +10,21 @@ import api from "@/lib/api";
 
 interface User {
   id: number;
+  last_name: string;  
+  first_name: string;
   email: string;
+  number?: string;
+  country?: string;
+  state?: string;
+  role?: {
+    name: string;
+  };
 }
 
 interface AuthContextType {
   user: User | null;
+  setUser: (user: any) => void;
+  updateUser: (data: any) => Promise<void>;
   login: (access: string, refresh: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
@@ -34,6 +44,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     navigate("/login");
   };
 
+  const updateUser = async (data: any) => {
+    try {
+      const res = await api.put("/users/update-profile", data);
+
+      setUser(res.data.response);
+
+    } catch (error) {
+      console.error("Erreur update profile", error);
+    }
+  };
+
   const loadUser = async () => {
     try {
       const token = localStorage.getItem("access_token");
@@ -43,7 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       const res = await api.get("/users/profile");
-      setUser(res.data.response);
+      setUser(prev => ({ ...prev, ...res.data.response }));
     } catch (err) {
       console.log("Token invalide");
       logout();
@@ -68,6 +89,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     <AuthContext.Provider
       value={{
         user,
+        setUser,
+        updateUser,
         login,
         logout,
         isAuthenticated: !!user,

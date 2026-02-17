@@ -8,10 +8,22 @@ export class User extends BaseEntity{
   id: number;
 
   @Column({ nullable: true })
-  full_name?: string;
+  first_name?: string;
+
+  @Column({ nullable: true })
+  last_name?: string;
 
   @Column({ unique: true })
   email: string;
+
+  @Column({ nullable: true })
+  number?: string;
+
+  @Column({ nullable: true })
+  country?: string;
+
+  @Column({ nullable: true })
+  state?: string;
 
   @Column()
   password: string;

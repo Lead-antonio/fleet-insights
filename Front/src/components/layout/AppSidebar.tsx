@@ -1,4 +1,4 @@
-import { LayoutDashboard, Car, Fuel, AlertTriangle, Wrench, BarChart3, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Car, Settings, LogOut, UserCircle } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
@@ -19,6 +19,7 @@ export function AppSidebar() {
 
   const menuItems = [
     { title: t.nav.dashboard, url: '/', icon: LayoutDashboard },
+    { title: t.profile.title, url: '/profile', icon: UserCircle },
     { title: t.nav.vehicles, url: '/vehicles', icon: Car },
     { title: t.nav.settings, url: '/settings', icon: Settings },
   ];
@@ -27,9 +28,9 @@ export function AppSidebar() {
     <Sidebar className="border-r border-sidebar-border">
       <SidebarHeader className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          {/* <div className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center"> */}
-            {/* <Car className="w-6 h-6 text-white" /> */}
-            <img className="w-10 h-10" src="/icon.png" alt="" />
+          <div className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center">
+            <Car className="w-6 h-6 text-white" />
+          </div>
           <div>
             <h1 className="font-bold text-lg text-sidebar-foreground">M-TEC</h1>
             <p className="text-xs text-sidebar-foreground/60">Fleet Master</p>

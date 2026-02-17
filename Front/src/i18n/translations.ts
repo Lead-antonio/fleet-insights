@@ -181,6 +181,22 @@ export const translations = {
       signIn: 'Se connecter',
       demoAccess: 'Accès démo',
     },
+    // Profile
+    profile: {
+      title: 'Mon Profil',
+      subtitle: 'Gérer vos informations personnelles',
+      personalInfo: 'Informations personnelles',
+      firstName: 'Prénom',
+      lastName: 'Nom',
+      email: 'Email',
+      phone: 'Téléphone',
+      company: 'Entreprise',
+      role: 'Rôle',
+      city: 'Ville',
+      country: 'Pays',
+      saveSuccess: 'Profil mis à jour avec succès',
+      saveError: 'Erreur lors de la mise à jour du profil',
+    },
     // Settings
     settings: {
       title: 'Paramètres',
@@ -375,6 +391,22 @@ export const translations = {
       forgotPassword: 'Forgot password?',
       signIn: 'Sign in',
       demoAccess: 'Demo access',
+    },
+    // Profile
+    profile: {
+      title: 'My Profile',
+      subtitle: 'Manage your personal information',
+      personalInfo: 'Personal Information',
+      firstName: 'First Name',
+      lastName: 'Last Name',
+      email: 'Email',
+      phone: 'Phone',
+      company: 'Company',
+      role: 'Role',
+      city: 'City',
+      country: 'Country',
+      saveSuccess: 'Profile updated successfully',
+      saveError: 'Error updating profile',
     },
     // Settings
     settings: {

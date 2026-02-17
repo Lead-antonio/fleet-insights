@@ -60,9 +60,9 @@ export function AppHeader() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center text-white font-medium">
+         <a href="/profile" className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center text-white font-medium hover:opacity-90 transition-opacity">
           A
-        </div>
+         </a>
       </div>
     </header>
   );

@@ -62,8 +62,8 @@ export class UsersController {
   }
 
   @Put('update-profile')
-  async updateProfile(@Req() req, @Body() dto: UpdateUserDto) {
-    const updatedUser = await this.usersService.updateProfile(req.user.sub, dto);
+  async updateProfile(@GetUser() user: any, @Body() dto: UpdateUserDto) {
+    const updatedUser = await this.usersService.updateProfile(user.sub, dto);
 
     return {
       status: 200,

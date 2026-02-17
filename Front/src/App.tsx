@@ -13,6 +13,7 @@ import Settings from "./pages/Settings";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import AppLayout from "./components/layout/AppLayout";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
                 <Route element={<ProtectedRoute />}>
                   <Route element={<SidebarProvider><AppLayout /></SidebarProvider>}>
                     <Route path="/" element={<Dashboard />} />
+                     <Route path="/profile" element={<Profile />} />
                     <Route path="/vehicles" element={<Vehicles />} />
                     <Route path="/settings" element={<Settings />} />
                   </Route>
