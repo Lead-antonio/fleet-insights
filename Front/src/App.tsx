@@ -14,6 +14,7 @@ import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import AppLayout from "./components/layout/AppLayout";
 import Profile from "./pages/Profile";
+import Register from "./pages/Register";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
           <AuthProvider>
               <Routes>
                 <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
 
                 <Route element={<ProtectedRoute />}>
                   <Route element={<SidebarProvider><AppLayout /></SidebarProvider>}>

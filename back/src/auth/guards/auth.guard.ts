@@ -31,19 +31,19 @@ export class AuthGuard implements CanActivate {
     }
     try {
       const payload = await this.jwtService.verifyAsync(token);
-      console.log("PAYLOAD:", payload);
       const user = await this.usersService.findById(payload.sub);
 
       if (
         user.password_changed_at &&
         payload.iat * 1000 < user.password_changed_at.getTime()
       ) {
-        throw new UnauthorizedException('Token expired');
+        throw new UnauthorizedException(
+          'Password changed. Please login again.',
+        );
       }
 
       request['user'] = payload;
     } catch (err) {
-      console.log("ERREUR VERIFY:", err);
       throw new UnauthorizedException();
     }
     return true;

@@ -6,36 +6,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { User, Mail, Phone, Building2, MapPin, Shield, Camera, Save, X, Pencil } from 'lucide-react';
+import { User, Mail, Phone, Building2, MapPin, Shield, Camera, Save, X, Pencil, Loader, Lock } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/lib/api';
+import { useNavigate } from 'react-router-dom';
 
-interface UserProfile {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  company: string;
-  role: string;
-  city: string;
-  country: string;
-}
-
-const defaultProfile: UserProfile = {
-  firstName: 'Ahmed',
-  lastName: 'Benali',
-  email: 'ahmed.benali@fleetmanager.ma',
-  phone: '+212 6 12 34 56 78',
-  company: 'FleetManager Pro',
-  role: 'Administrateur',
-  city: 'Casablanca',
-  country: 'Maroc',
-};
 
 const Profile = () => {
   const { t } = useLanguage();
-  const {user, updateUser} = useAuth();
+  const navigate = useNavigate();
+  const {user, updateUser, updatePassword, logout} = useAuth();
 
   if (!user) {
     return <div>Chargement...</div>;
@@ -43,13 +24,19 @@ const Profile = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
-    first_name: user.first_name,
-    last_name: user.last_name,
+    first_name: user?.first_name,
+    last_name: user?.last_name,
     email: user.email,
-    number: user.number || "",
-    state: user.state || "",
-    country: user.country || "",
+    number: user?.number || "",
+    state: user?.state || "",
+    country: user?.country || "",
   });
+
+  // Password change state
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEditForm({
@@ -72,17 +59,43 @@ const Profile = () => {
 
   const handleCancel = () => {
     setEditForm({
-      first_name: user.first_name,
-      last_name: user.last_name,
+      first_name: user?.first_name,
+      last_name: user?.last_name,
       email: user.email,
-      number: user.number || "",
-      state: user.state || "",
-      country: user.country || "",
+      number: user?.number || "",
+      state: user?.state || "",
+      country: user?.country || "",
     });
     setIsEditing(false);
   };
 
-  const initials = `${user.first_name.charAt(0)}${user.last_name.charAt(0)}`;
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword.length < 6) {
+      toast.error(t.profile.passwordTooShort);
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      toast.error(t.profile.passwordMismatch);
+      return;
+    }
+    setPasswordLoading(true);
+    const { error } = await updatePassword(currentPassword,newPassword);
+
+    setPasswordLoading(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success(t.profile.passwordChanged);
+      logout();
+      navigate("/login");
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+    }
+  };
+
+  const initials = `${user?.first_name?.charAt(0)}${user?.last_name?.charAt(0)}`;
 
   return (
     <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
@@ -249,6 +262,35 @@ const Profile = () => {
               <ProfileField icon={<MapPin className="w-4 h-4" />} label={t.profile.country} value={user.country} />
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Password Change */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Lock className="w-5 h-5" />
+            {t.profile.security}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handlePasswordChange} className="space-y-4 max-w-md">
+            <div className="space-y-2">
+              <Label htmlFor="currentPassword">{t.profile.currentPassword}</Label>
+              <Input id="currentPassword" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="••••••••" required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="newPassword">{t.profile.newPassword}</Label>
+              <Input id="newPassword" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="••••••••" required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmNewPassword">{t.profile.confirmNewPassword}</Label>
+              <Input id="confirmNewPassword" type="password" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} placeholder="••••••••" required />
+            </div>
+            <Button type="submit" disabled={passwordLoading} className="gap-2">
+              {passwordLoading ? <Loader size="sm" /> : <><Lock className="w-4 h-4" />{t.profile.changePassword}</>}
+            </Button>
+          </form>
         </CardContent>
       </Card>
     </div>

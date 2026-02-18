@@ -41,6 +41,25 @@ export class UsersService {
         return this.usersRepository.save(user);
     }
 
+    async signup(createUserDto: CreateUserDto): Promise<User> {
+        const exists = await this.usersRepository.findOne({
+            where: { email: createUserDto.email },
+        });
+
+        if (exists) {
+            throw new ConflictException('Email already exists');
+        }
+
+        const user = new User();
+        user.email = createUserDto.email;
+        user.is_active = false; 
+        
+        const salt = await bcrypt.genSalt();
+        user.password = await bcrypt.hash(createUserDto.password, salt);
+
+        return this.usersRepository.save(user);
+    }
+
     findByEmail(email: string): Promise<User | null> {
         return this.usersRepository.findOne({ where: { email } });
     }
@@ -104,12 +123,12 @@ export class UsersService {
 
         const isSamePassword = await bcrypt.compare(newPassword, user.password);
         if (isSamePassword) {
-            throw new BadRequestException('New password must be different from the current password');
+            throw new BadRequestException('New password must be different from the current password');   return { message: 'Password updated successfully' };
         }
 
         const isMatch = await bcrypt.compare(currentPassword, user.password);
         if (!isMatch) {
-            throw new BadRequestException('Current password is incorrect');
+            throw new BadRequestException('Current password is incorrect'); return { message: 'Current password is incorrect' };
         }
 
         user.password = await bcrypt.hash(newPassword, 10);

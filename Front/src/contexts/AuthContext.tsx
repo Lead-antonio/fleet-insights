@@ -9,9 +9,9 @@ import { useNavigate } from "react-router-dom";
 import api from "@/lib/api";
 
 interface User {
-  id: number;
-  last_name: string;  
-  first_name: string;
+  id?: number;
+  last_name?: string;  
+  first_name?: string;
   email: string;
   number?: string;
   country?: string;
@@ -25,8 +25,10 @@ interface AuthContextType {
   user: User | null;
   setUser: (user: any) => void;
   updateUser: (data: any) => Promise<void>;
+  signUp: (data: any) => Promise<string>;
   login: (access: string, refresh: string) => Promise<void>;
   logout: () => void;
+  updatePassword: (currentPassword: string, newPassword: string) => Promise<{ error: any }>;
   isAuthenticated: boolean;
   loading: boolean;
 }
@@ -38,7 +40,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const logout = () => {
+  const logout = async () => {
     localStorage.clear();
     setUser(null);
     navigate("/login");
@@ -52,6 +54,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     } catch (error) {
       console.error("Erreur update profile", error);
+    }
+  };
+
+  const signUp = async (data: any) => {
+    try {
+      const res = await api.post("/users/signup", data);
+      return res.data.message;
+    } catch (error) {
+      console.error("Erreur signup", error);
+      throw new Error(error.response?.data?.message || "Erreur lors de l'inscription");
     }
   };
 
@@ -81,6 +93,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     navigate("/");
   };
 
+  const updatePassword = async (
+    currentPassword: string,
+    newPassword: string
+  ) => {
+    try {
+      const result = await api.put("/users/change-password", {
+        currentPassword,
+        newPassword,
+      });
+
+      return { data: result.data, error: null };
+    } catch (error: any) {
+      return {
+        data: null,
+        error: error.response?.data || {
+          message: "Something went wrong",
+        },
+      };
+    }
+  };
+
+
   useEffect(() => {
     loadUser();
   }, []);
@@ -91,10 +125,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         user,
         setUser,
         updateUser,
+        signUp,
         login,
         logout,
         isAuthenticated: !!user,
         loading,
+        updatePassword,
       }}
     >
       {!loading && children}

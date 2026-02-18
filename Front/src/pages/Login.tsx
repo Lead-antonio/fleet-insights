@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Car } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/lib/api';
+import { Loader } from '@/components/ui/loader';
 
 const Login = () => {
   const { t } = useLanguage();
@@ -28,7 +29,6 @@ const Login = () => {
         email,
         password,
       });
-      console.log("Réponse du serveur :", res.data);
       const access = res.data.response.access_token;
       const refresh = res.data.response.refresh_token;
       login(access, refresh);
@@ -48,8 +48,8 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/20 via-background to-accent/20 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto w-16 h-16 rounded-xl gradient-primary flex items-center justify-center mb-4">
-            {/* <img className="mx-auto w-20 h-20" src="/fleet.png" alt="" /> */}
+          <div className="mx-auto w-25 h-25 rounded-xl  flex items-center justify-center mb-4">
+            <img className="mx-auto w-20 h-20" src="/m-tec.png" alt="" />
           </div>
           <CardTitle className="text-2xl">M-tec Fleet Master</CardTitle>
           <CardDescription>{t.login.subtitle}</CardDescription>
@@ -78,15 +78,16 @@ const Login = () => {
                 required
               />
             </div>
-            <Button type="submit" className="w-full gradient-primary">
-              {loading ? "Connexion en cours..." : t.login.signIn}
+            <Button type="submit" className="w-full gradient-primary" disabled={loading}>
+              {loading ? <Loader size="sm" /> : t.login.signIn}
             </Button>
             {error && (
               <div className="mb-3 text-red-500 text-sm">{error}</div>
             )}
-            {/* <Button type="button" variant="outline" className="w-full" onClick={handleDemo}>
-              {t.login.demoAccess}
-            </Button> */}
+            <p className="text-center text-sm text-muted-foreground">
+              {t.login.noAccount}{' '}
+              <Link to="/register" className="text-primary hover:underline">{t.register.createAccount}</Link>
+            </p>
           </form>
         </CardContent>
       </Card>

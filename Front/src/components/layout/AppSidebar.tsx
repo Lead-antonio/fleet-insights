@@ -1,5 +1,5 @@
 import { LayoutDashboard, Car, Settings, LogOut, UserCircle } from 'lucide-react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   Sidebar,
@@ -12,10 +12,18 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from '@/components/ui/sidebar';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function AppSidebar() {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const location = useLocation();
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
 
   const menuItems = [
     { title: t.nav.dashboard, url: '/', icon: LayoutDashboard },
@@ -62,11 +70,11 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t border-sidebar-border">
-        <SidebarMenuButton asChild className="w-full">
-          <NavLink to="/login" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors">
+        <SidebarMenuButton asChild className="w-full" onClick={handleLogout}>
+          <div className="flex items-center gap-3 px-3 py-2 rounded-lg text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors cursor-pointer">
             <LogOut className="w-5 h-5" />
             <span>{t.nav.logout}</span>
-          </NavLink>
+          </div>
         </SidebarMenuButton>
       </SidebarFooter>
     </Sidebar>

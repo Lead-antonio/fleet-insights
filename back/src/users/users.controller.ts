@@ -17,10 +17,22 @@ interface RequestWithUser extends Request {
 export class UsersController {
     constructor(private readonly usersService: UsersService) {}
 
-  @Public()
+
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
     const user = await this.usersService.create(createUserDto);
+
+    return {
+      status: 200,
+      message: 'Utilisateur créé avec succès',
+      response: user,
+    };
+  }
+
+  @Public()
+  @Post("/signup")
+  async signup(@Body() createUserDto: CreateUserDto) {
+    const user = await this.usersService.signup(createUserDto);
 
     return {
       status: 200,
@@ -64,12 +76,7 @@ export class UsersController {
   @Put('update-profile')
   async updateProfile(@GetUser() user: any, @Body() dto: UpdateUserDto) {
     const updatedUser = await this.usersService.updateProfile(user.sub, dto);
-
-    return {
-      status: 200,
-      message: 'Profil mis à jour avec succès',
-      response: updatedUser,
-    };
+    return updatedUser;
   }
 
   @Put('change-password')
