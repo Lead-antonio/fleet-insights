@@ -29,6 +29,7 @@ interface AuthContextType {
   login: (access: string, refresh: string) => Promise<void>;
   logout: () => void;
   updatePassword: (currentPassword: string, newPassword: string) => Promise<{ error: any }>;
+  forgotPassword: (email: string) => Promise<{ data: any; error: any }>;
   isAuthenticated: boolean;
   loading: boolean;
 }
@@ -114,6 +115,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const forgotPassword = async (email: string) => {
+    try {
+      const result = await api.post("/auth/forgot-password", { email }); 
+      return { data: result.data, error: null };
+    } catch (error: any) {
+      return {
+        data: null,
+        error: error.response?.data || {
+          message: "Something went wrong",
+        },
+      };
+    }
+  };
 
   useEffect(() => {
     loadUser();
@@ -131,6 +145,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isAuthenticated: !!user,
         loading,
         updatePassword,
+        forgotPassword,
       }}
     >
       {!loading && children}

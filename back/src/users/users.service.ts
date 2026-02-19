@@ -52,6 +52,11 @@ export class UsersService {
 
         const user = new User();
         user.email = createUserDto.email;
+        user.first_name = createUserDto?.first_name;
+        user.last_name = createUserDto?.last_name;
+        user.number = createUserDto?.number;
+        user.country = createUserDto?.country;
+        user.state = createUserDto?.state;
         user.is_active = false; 
         
         const salt = await bcrypt.genSalt();

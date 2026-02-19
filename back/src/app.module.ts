@@ -16,6 +16,7 @@ import { VehiculesModule } from './vehicules/vehicules.module';
 import { Customer } from './customers/entity/customer.entity';
 import { VehiculeType } from './vehicule-types/entity/vehicule-type.entity';
 import { Vehicule } from './vehicules/entity/vehicule.entity';
+import { PasswordResetToken } from './auth/entity/password-reset-token.entity';
 
 @Module({
   imports: [
@@ -30,7 +31,7 @@ import { Vehicule } from './vehicules/entity/vehicule.entity';
         username: config.get<string>('DB_USERNAME', 'root'), 
         password: config.get<string>('DB_PASSWORD', ''), 
         database: config.get<string>('DB_DATABASE', ''),
-        entities: [User, Role, Permission, Customer, VehiculeType, Vehicule],
+        entities: [User, Role, Permission, Customer, VehiculeType, Vehicule, PasswordResetToken],
         synchronize: true,
       }),
     }),

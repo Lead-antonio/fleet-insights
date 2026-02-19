@@ -109,14 +109,12 @@ export class AuthService {
             expires_at: expires,
         });
 
-        const resetLink = `${this.configService.get(
-            'FRONTEND_URL',
-        )}/reset-password?token=${rawToken}`;
+        const resetLink = `${process.env.FRONT_URL}/reset-password?token=${rawToken}`;
 
         await this.mailService.sendMail({
             to: user.email,
-            subject: 'Reset your password',
-            html: 'reset-password',
+            subject: 'Réinitialisation mot de passe',
+            html: `<a href="${resetLink}">Réinitialiser</a>`,
         });
     }
 

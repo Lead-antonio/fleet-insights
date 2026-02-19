@@ -15,6 +15,8 @@ import NotFound from "./pages/NotFound";
 import AppLayout from "./components/layout/AppLayout";
 import Profile from "./pages/Profile";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +31,7 @@ const App = () => (
               <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
 
                 <Route element={<ProtectedRoute />}>
                   <Route element={<SidebarProvider><AppLayout /></SidebarProvider>}>
@@ -36,6 +39,7 @@ const App = () => (
                      <Route path="/profile" element={<Profile />} />
                     <Route path="/vehicles" element={<Vehicles />} />
                     <Route path="/settings" element={<Settings />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
                   </Route>
                 </Route>
                 
