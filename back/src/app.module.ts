@@ -17,6 +17,7 @@ import { Customer } from './customers/entity/customer.entity';
 import { VehiculeType } from './vehicule-types/entity/vehicule-type.entity';
 import { Vehicule } from './vehicules/entity/vehicule.entity';
 import { PasswordResetToken } from './auth/entity/password-reset-token.entity';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -35,7 +36,7 @@ import { PasswordResetToken } from './auth/entity/password-reset-token.entity';
         synchronize: true,
       }),
     }),
-    AuthModule, UsersModule, RolesModule, PermissionsModule, CustomersModule, VehiculeTypesModule, VehiculesModule],
+    AuthModule, UsersModule, RolesModule, PermissionsModule, CustomersModule, VehiculeTypesModule, VehiculesModule, MailModule],
   controllers: [AppController],
   providers: [AppService],
 })

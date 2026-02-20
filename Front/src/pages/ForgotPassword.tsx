@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader } from "@/components/ui/loader";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // ── Branding panel ────────────────────────────────────────────────────────────
 function ImagePanel() {
@@ -79,6 +80,7 @@ function SuccessState({ email }: { email: string }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function ForgotPasswordPage() {
+  const { t } = useLanguage();
   const { forgotPassword } = useAuth();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -91,9 +93,13 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     try {
       const { data, error } = await forgotPassword(email);
-      setSent(true);
+      if (error) {
+        setError(t.forgotPassword.errors[error.code]);
+      } else {
+        setSent(true);
+      }
     } catch {
-      setError("Une erreur est survenue. Veuillez réessayer.");
+      setError(t.forgotPassword.errors.default);
     } finally {
       setLoading(false);
     }

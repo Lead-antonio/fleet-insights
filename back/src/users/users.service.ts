@@ -47,7 +47,7 @@ export class UsersService {
         });
 
         if (exists) {
-            throw new ConflictException('Email already exists');
+            throw new ConflictException({code: 'EMAIL_ALREADY_EXISTS'});
         }
 
         const user = new User();

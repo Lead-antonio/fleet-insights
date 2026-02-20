@@ -8,8 +8,8 @@ export class MailService {
   async sendMail(options: {
     to: string;
     subject: string;
-    text?: string;
-    html?: string;
+    template?: string;
+    context?: any;
   }) {
     return this.mailerService.sendMail(options);
   }

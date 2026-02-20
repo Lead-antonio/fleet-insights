@@ -80,10 +80,9 @@ const Login = () => {
       login(access, refresh);
 
       navigate("/");
-    } catch (err) {
-      setError(
-        err.response?.data?.message || "Email ou mot de passe incorrect"
-      );
+    } catch (err: any) {
+      const code = err.response?.data?.code || 'default';
+      setError(t.login?.[code]);
     } finally {
       setLoading(false);
     }     

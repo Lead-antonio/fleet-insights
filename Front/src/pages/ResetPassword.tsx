@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader } from "@/components/ui/loader";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // ── Password strength helper ──────────────────────────────────────────────────
 function getStrength(pwd: string): { score: number; label: string; color: string } {
@@ -35,7 +37,7 @@ function ImagePanel() {
         </div>
 
         <div className="text-white space-y-3">
-          <h2 className="text-3xl font-bold tracking-tight">M-tec Fleet Master</h2>
+          <h2 className="text-3xl font-bold tracking-tight">Fleet Manager</h2>
           <p className="text-white/70 text-sm leading-relaxed max-w-xs">
             Choisissez un nouveau mot de passe sécurisé pour protéger l'accès à votre flotte.
           </p>
@@ -127,7 +129,9 @@ function InvalidTokenState() {
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function ResetPassword() {
+  const { t } = useLanguage();
   const [searchParams] = useSearchParams();
+  const { resetPassword } = useAuth();
   const navigate = useNavigate();
 
   // Get token from URL: /reset-password?token=xxxx
@@ -144,8 +148,8 @@ export default function ResetPassword() {
   const strength = getStrength(password);
 
   const validate = () => {
-    if (password.length < 6) return "Le mot de passe doit contenir au moins 6 caractères.";
-    if (password !== confirmPassword) return "Les mots de passe ne correspondent pas.";
+    if (password.length < 6) return t.validation.password.minLength;
+    if (password !== confirmPassword) return t.validation.confirmPassword.mismatch;
     return null;
   };
 
@@ -156,11 +160,17 @@ export default function ResetPassword() {
     setError("");
     setLoading(true);
     try {
-      // TODO: appel API — ex: await authService.resetPassword({ token, password })
-      await new Promise((r) => setTimeout(r, 1500));
-      setDone(true);
-    } catch {
-      setError("Une erreur est survenue. Veuillez réessayer.");
+      const { data, error } = await resetPassword(token, password);
+      if (error) {
+        const code = error.code || error.message;
+        const errorMessage = t.error?.[code] ?? t.error?.default;
+         setError(errorMessage);
+      } else {
+        await new Promise((r) => setTimeout(r, 1500));
+        setDone(true);
+      }
+    } catch (err) {
+      setError(t.error?.default);
     } finally {
       setLoading(false);
     }

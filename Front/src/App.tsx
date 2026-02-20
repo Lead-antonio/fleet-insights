@@ -32,6 +32,7 @@ const App = () => (
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
 
                 <Route element={<ProtectedRoute />}>
                   <Route element={<SidebarProvider><AppLayout /></SidebarProvider>}>
@@ -39,7 +40,6 @@ const App = () => (
                      <Route path="/profile" element={<Profile />} />
                     <Route path="/vehicles" element={<Vehicles />} />
                     <Route path="/settings" element={<Settings />} />
-                    <Route path="/reset-password" element={<ResetPassword />} />
                   </Route>
                 </Route>
                 

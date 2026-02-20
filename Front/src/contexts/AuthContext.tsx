@@ -30,6 +30,7 @@ interface AuthContextType {
   logout: () => void;
   updatePassword: (currentPassword: string, newPassword: string) => Promise<{ error: any }>;
   forgotPassword: (email: string) => Promise<{ data: any; error: any }>;
+  resetPassword: (token: string, newPassword: string) => Promise<{ data: any; error: any }>;
   isAuthenticated: boolean;
   loading: boolean;
 }
@@ -63,8 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const res = await api.post("/users/signup", data);
       return res.data.message;
     } catch (error) {
-      console.error("Erreur signup", error);
-      throw new Error(error.response?.data?.message || "Erreur lors de l'inscription");
+      throw { code: error.response?.data?.code || 'default' };
     }
   };
 
@@ -122,6 +122,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: any) {
       return {
         data: null,
+        error: { code: error.response?.data?.code || 'default' },
+      };
+    }
+  };
+
+  const resetPassword = async (token: string, newPassword: string) => {
+    try {
+      const result = await api.post("/auth/reset-password", { token, newPassword });
+      return { data: result.data, error: null };
+    } catch (error: any) {
+      return {
+        data: null,
         error: error.response?.data || {
           message: "Something went wrong",
         },
@@ -146,6 +158,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         loading,
         updatePassword,
         forgotPassword,
+        resetPassword,
       }}
     >
       {!loading && children}

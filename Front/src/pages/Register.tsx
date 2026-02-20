@@ -145,12 +145,12 @@ export default function Register() {
   // ── Validation étape 1 ──────────────────────────────────────────────────────
   const validateStep1 = () => {
     const newErrors: typeof errors = {};
-    if (!userForm.email) newErrors.email = "L'email est requis";
-    else if (!/\S+@\S+\.\S+/.test(userForm.email)) newErrors.email = "Email invalide";
-    if (!userForm.password) newErrors.password = "Le mot de passe est requis";
-    else if (userForm.password.length < 6) newErrors.password = "Minimum 6 caractères";
-    if (!confirmPassword) newErrors.confirmPassword = "Veuillez confirmer le mot de passe";
-    else if (userForm.password !== confirmPassword) newErrors.confirmPassword = "Les mots de passe ne correspondent pas";
+    if (!userForm.email) newErrors.email = t.validation.email.required;
+    else if (!/\S+@\S+\.\S+/.test(userForm.email)) newErrors.email = t.validation.email.invalid;
+    if (!userForm.password) newErrors.password = t.validation.password.required;
+    else if (userForm.password.length < 6) newErrors.password = t.validation.password.minLength;
+    if (!confirmPassword) newErrors.confirmPassword = t.validation.confirmPassword.required;
+    else if (userForm.password !== confirmPassword) newErrors.confirmPassword = t.validation.confirmPassword.mismatch;
     return newErrors;
   };
 
@@ -174,7 +174,8 @@ export default function Register() {
     }
     catch (error) {
         setLoading(false); 
-        toast.error(error.message);
+        const code = error.code || 'default';
+        toast.error(t.register?.[code]);
         setUserForm({
           email: "",
           password: "",

@@ -109,12 +109,13 @@ export class AuthService {
             expires_at: expires,
         });
 
-        const resetLink = `${process.env.FRONT_URL}/reset-password?token=${rawToken}`;
+        const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${rawToken}`;
 
         await this.mailService.sendMail({
             to: user.email,
             subject: 'Réinitialisation mot de passe',
-            html: `<a href="${resetLink}">Réinitialiser</a>`,
+            template: 'reset-password',
+            context: { resetLink },
         });
     }
 
@@ -127,26 +128,28 @@ export class AuthService {
         });
 
         if (!resetToken) {
-            throw new BadRequestException('Invalid token');
+            throw new BadRequestException({ code: 'INVALID_TOKEN' });
         }
 
         if (resetToken.expires_at < new Date()) {
             await this.passwordResetRepo.delete(resetToken.id);
-            throw new BadRequestException('Token expired');
+            throw new BadRequestException({ code: 'TOKEN_EXPIRED' });
         }
 
         const user = resetToken.user;
 
         const samePassword = await bcrypt.compare(newPassword, user.password);
         if (samePassword) {
-            throw new BadRequestException('Password must be different');
+            throw new BadRequestException({ code: 'SAME_PASSWORD' });
         }
 
-        user.password = await bcrypt.hash(newPassword, 10);
-        user.password_changed_at = new Date();
-
-        await this.usersRepo.save(user);
-        await this.passwordResetRepo.delete(resetToken.id);
+        // ✅ Transaction atomique : les deux opérations réussissent ou échouent ensemble
+        await this.passwordResetRepo.manager.transaction(async (manager) => {
+            user.password = await bcrypt.hash(newPassword, 10);
+            user.password_changed_at = new Date();
+            await manager.save(user);
+            await manager.delete(this.passwordResetRepo.target, resetToken.id);
+        });
     }
 
 

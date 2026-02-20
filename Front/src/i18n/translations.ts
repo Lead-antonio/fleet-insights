@@ -181,6 +181,7 @@ export const translations = {
       signIn: 'Se connecter',
       demoAccess: 'Accès démo',
       noAccount: 'Pas encore de compte ?',
+      INVALID_CREDENTIALS: 'Email ou mot de passe incorrect',
     },
     // Register
     register: {
@@ -191,6 +192,7 @@ export const translations = {
       passwordMismatch: 'Les mots de passe ne correspondent pas',
       passwordTooShort: 'Le mot de passe doit contenir au moins 6 caractères',
       checkEmail: 'Vérifiez votre email pour confirmer votre compte',
+      EMAIL_ALREADY_EXISTS: 'Cette adresse email est déjà utilisée.',
     },
     // Profile
     profile: {
@@ -227,6 +229,32 @@ export const translations = {
       language: 'Langue',
       theme: 'Thème',
       notifications: 'Notifications',
+    },
+    error : {
+      INVALID_TOKEN: 'Lien de réinitialisation invalide',
+      TOKEN_EXPIRED: 'Ce lien a expiré. Veuillez demander un nouveau lien de réinitialisation.',
+      SAME_PASSWORD: 'Le nouveau mot de passe doit être différent de l\'ancien.',
+      default: 'Une erreur inattendue est survenue. Veuillez réessayer.'
+    },
+    validation: {
+      email: {
+        required: "L'email est requis.",
+        invalid: "Email invalide.",
+      },
+      password: {
+        required: "Le mot de passe est requis.",
+        minLength: "Minimum 6 caractères.",
+      },
+      confirmPassword: {
+        required: "Veuillez confirmer le mot de passe.",
+        mismatch: "Les mots de passe ne correspondent pas.",
+      },
+    },
+    forgotPassword: {
+      success: "Si cet email existe, un lien de réinitialisation a été envoyé.",
+      errors: {
+        default: "Une erreur est survenue. Veuillez réessayer.",
+      },
     },
   },
   en: {
@@ -411,6 +439,7 @@ export const translations = {
       signIn: 'Sign in',
       demoAccess: 'Demo access',
       noAccount: "Don't have an account?",
+      INVALID_CREDENTIALS: 'Invalid email or password',
     },
     // Register
     register: {
@@ -421,6 +450,7 @@ export const translations = {
       passwordMismatch: 'Passwords do not match',
       passwordTooShort: 'Password must be at least 6 characters',
       checkEmail: 'Check your email to confirm your account',
+      EMAIL_ALREADY_EXISTS: 'This email address is already in use.',
     },
     // Profile
     profile: {
@@ -457,6 +487,32 @@ export const translations = {
       language: 'Language',
       theme: 'Theme',
       notifications: 'Notifications',
+    },
+    error : {
+      INVALID_TOKEN: 'Invalid reset link',
+      TOKEN_EXPIRED: 'This link has expired. Please request a new reset link.',
+      SAME_PASSWORD: 'The new password must be different from the old one.',
+      default: 'An unexpected error occurred. Please try again.'
+    },
+    validation: {
+      email: {
+        required: "Email is required.",
+        invalid: "Invalid email address.",
+      },
+      password: {
+        required: "Password is required.",
+        minLength: "Minimum 6 characters.",
+      },
+      confirmPassword: {
+        required: "Please confirm your password.",
+        mismatch: "Passwords do not match.",
+      },
+    },
+    forgotPassword: {
+      success: "If this email exists, a reset link has been sent.",
+      errors: {
+        default: "Something went wrong. Please try again.",
+      },
     },
   },
 };
