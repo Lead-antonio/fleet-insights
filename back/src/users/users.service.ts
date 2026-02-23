@@ -129,7 +129,17 @@ export class UsersService {
             throw new NotFoundException('Utilisateur introuvable');
         }
 
-        await this.usersRepository.update(id, dto);
+        const { role_id, ...updateData } = dto;
+
+        await this.usersRepository.update(id, updateData);
+
+        if (role_id) {
+            const role = await this.rolesRepository.findOne({ where: { id: role_id } });
+            if (role) {
+            user.role = role;
+            await this.usersRepository.save(user);
+            }
+        }
 
         const updatedUser = await this.usersRepository.findOne({
             where: { id },

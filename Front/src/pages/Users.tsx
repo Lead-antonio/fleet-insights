@@ -36,7 +36,7 @@ interface Permission {
 }
 
 interface Role {
-  id: string;
+  id: number;
   name: string;
   permissions: Permission[];
 }
@@ -145,7 +145,7 @@ const Users = () => {
   const handleEdit = async (data: Partial<User>) => {
     if (!selectedUser) return;
     try {
-      const { first_name, last_name, email, number, country, state } = selectedUser;
+      const { first_name, last_name, email, number, country, state, role } = selectedUser;
       const response = await api.put(`/users/update-user/${selectedUser.id}`, {
         first_name,
         last_name,
@@ -153,12 +153,17 @@ const Users = () => {
         number,
         country,
         state,
+        role_id: role?.id || null,
       });
       await fetchUsers();
       setEditDialogOpen(false);
-      toast.success(t.users?.[response.data?.message]);
+      toast.success(t.users?.[response.data?.message], {
+        style: { background: '#22c55e', color: 'white', border: '1px solid #16a34a' }
+      });
     } catch (err) {
-      toast.error(t.users?.[err.response?.data?.message]);
+      toast.error(t.users?.[err.response?.data?.message], {
+        style: { background: '#ef4444', color: 'white', border: '1px solid #dc2626' }
+      });
     }
   };
 
@@ -386,6 +391,25 @@ const Users = () => {
                   onChange={(e) => setSelectedUser(prev => prev ? { ...prev, state: e.target.value } : null)}
                 />
               </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label>{t.users.role}</Label>
+              <Select
+                value={selectedUser?.role?.id?.toString() || ''}
+                onValueChange={(val) => setSelectedUser(prev => prev ? { ...prev, role: { ...prev.role, id: parseInt(val) } } : null)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t.users.selectRole} />
+                </SelectTrigger>
+                <SelectContent>
+                  {roles.map((role) => (
+                    <SelectItem key={role.id} value={role.id.toString()}>
+                      {role.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             
           </div>
