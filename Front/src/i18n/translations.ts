@@ -1,3 +1,5 @@
+import { add } from "date-fns";
+
 export const translations = {
   fr: {
     // Navigation
@@ -169,6 +171,7 @@ export const translations = {
       km: 'km',
       liters: 'L',
       currency: 'MAD',
+      actions: 'Actions',
     },
     // Login
     login: {
@@ -180,6 +183,43 @@ export const translations = {
       forgotPassword: 'Mot de passe oublié ?',
       signIn: 'Se connecter',
       demoAccess: 'Accès démo',
+      noAccount: 'Pas encore de compte ?',
+      INVALID_CREDENTIALS: 'Email ou mot de passe incorrect',
+    },
+    // Register
+    register: {
+      subtitle: 'Créer un nouveau compte',
+      confirmPassword: 'Confirmer le mot de passe',
+      createAccount: 'Créer un compte',
+      alreadyHaveAccount: 'Déjà un compte ?',
+      passwordMismatch: 'Les mots de passe ne correspondent pas',
+      passwordTooShort: 'Le mot de passe doit contenir au moins 6 caractères',
+      checkEmail: 'Vérifiez votre email pour confirmer votre compte',
+      EMAIL_ALREADY_EXISTS: 'Cette adresse email est déjà utilisée.',
+    },
+    // Profile
+    profile: {
+      title: 'Mon Profil',
+      subtitle: 'Gérer vos informations personnelles',
+      personalInfo: 'Informations personnelles',
+      firstName: 'Prénom',
+      lastName: 'Nom',
+      email: 'Email',
+      phone: 'Téléphone',
+      company: 'Entreprise',
+      role: 'Rôle',
+      city: 'Ville',
+      country: 'Pays',
+      saveSuccess: 'Profil mis à jour avec succès',
+      saveError: 'Erreur lors de la mise à jour du profil',
+      changePassword: 'Changer le mot de passe',
+      currentPassword: 'Mot de passe actuel',
+      newPassword: 'Nouveau mot de passe',
+      confirmNewPassword: 'Confirmer le nouveau mot de passe',
+      passwordChanged: 'Mot de passe modifié avec succès',
+      passwordMismatch: 'Les mots de passe ne correspondent pas',
+      passwordTooShort: 'Le mot de passe doit contenir au moins 6 caractères',
+      security: 'Sécurité',
     },
     // Settings
     settings: {
@@ -192,6 +232,65 @@ export const translations = {
       language: 'Langue',
       theme: 'Thème',
       notifications: 'Notifications',
+    },
+    error : {
+      INVALID_TOKEN: 'Lien de réinitialisation invalide',
+      TOKEN_EXPIRED: 'Ce lien a expiré. Veuillez demander un nouveau lien de réinitialisation.',
+      SAME_PASSWORD: 'Le nouveau mot de passe doit être différent de l\'ancien.',
+      default: 'Une erreur inattendue est survenue. Veuillez réessayer.'
+    },
+    validation: {
+      email: {
+        required: "L'email est requis.",
+        invalid: "Email invalide.",
+      },
+      password: {
+        required: "Le mot de passe est requis.",
+        minLength: "Minimum 6 caractères.",
+      },
+      confirmPassword: {
+        required: "Veuillez confirmer le mot de passe.",
+        mismatch: "Les mots de passe ne correspondent pas.",
+      },
+    },
+    forgotPassword: {
+      success: "Si cet email existe, un lien de réinitialisation a été envoyé.",
+      errors: {
+        default: "Une erreur est survenue. Veuillez réessayer.",
+      },
+    },
+    users: {
+      title: 'Utilisateurs',
+      subtitle: 'Gérer les utilisateurs et leurs rôles',
+      totalUsers: 'Total utilisateurs',
+      admins: 'Administrateurs',
+      standardUsers: 'Utilisateurs standard',
+      userList: 'Liste des utilisateurs',
+      first_name: 'Prénom',
+      last_name: 'Nom',
+      password: 'Mot de passe',
+      selectRole: 'Sélectionner un rôle',
+      name: 'Nom',
+      email: 'Email',
+      country: 'Pays',
+      state: 'Ville',
+      number: 'Téléphone',
+      role: 'Rôle',
+      joinDate: "Date d'inscription",
+      admin: 'Administrateur',
+      user: 'Utilisateur',
+      permissions: 'Permissions',
+      manage_user: 'Gestion Utilisateurs',
+      actions: 'Actions',
+      add_success: 'Utilisateur créé avec succès',
+      add_error: 'Erreur lors de la création de l\'utilisateur',
+      addUser: 'Ajouter un utilisateur',
+      editUser: 'Modifier l\'utilisateur',
+      delete: 'Supprimer l\'utilisateur',
+      deleteConfirmDesc: 'Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.',
+      deleteConfirmTitle: 'Confirmer la suppression',
+      saveSuccess: 'Utilisateur mis à jour avec succès',
+      saveError: 'Erreur lors de la mise à jour de l\'utilisateur',
     },
   },
   en: {
@@ -364,6 +463,7 @@ export const translations = {
       km: 'km',
       liters: 'L',
       currency: 'MAD',
+      actions: 'Actions',
     },
     // Login
     login: {
@@ -375,6 +475,43 @@ export const translations = {
       forgotPassword: 'Forgot password?',
       signIn: 'Sign in',
       demoAccess: 'Demo access',
+      noAccount: "Don't have an account?",
+      INVALID_CREDENTIALS: 'Invalid email or password',
+    },
+    // Register
+    register: {
+      subtitle: 'Create a new account',
+      confirmPassword: 'Confirm password',
+      createAccount: 'Create account',
+      alreadyHaveAccount: 'Already have an account?',
+      passwordMismatch: 'Passwords do not match',
+      passwordTooShort: 'Password must be at least 6 characters',
+      checkEmail: 'Check your email to confirm your account',
+      EMAIL_ALREADY_EXISTS: 'This email address is already in use.',
+    },
+    // Profile
+    profile: {
+      title: 'My Profile',
+      subtitle: 'Manage your personal information',
+      personalInfo: 'Personal Information',
+      firstName: 'First Name',
+      lastName: 'Last Name',
+      email: 'Email',
+      phone: 'Phone',
+      company: 'Company',
+      role: 'Role',
+      city: 'City',
+      country: 'Country',
+      saveSuccess: 'Profile updated successfully',
+      saveError: 'Error updating profile',
+      changePassword: 'Change password',
+      currentPassword: 'Current password',
+      newPassword: 'New password',
+      confirmNewPassword: 'Confirm new password',
+      passwordChanged: 'Password changed successfully',
+      passwordMismatch: 'Passwords do not match',
+      passwordTooShort: 'Password must be at least 6 characters',
+      security: 'Security',
     },
     // Settings
     settings: {
@@ -387,6 +524,64 @@ export const translations = {
       language: 'Language',
       theme: 'Theme',
       notifications: 'Notifications',
+    },
+    error : {
+      INVALID_TOKEN: 'Invalid reset link',
+      TOKEN_EXPIRED: 'This link has expired. Please request a new reset link.',
+      SAME_PASSWORD: 'The new password must be different from the old one.',
+      default: 'An unexpected error occurred. Please try again.'
+    },
+    validation: {
+      email: {
+        required: "Email is required.",
+        invalid: "Invalid email address.",
+      },
+      password: {
+        required: "Password is required.",
+        minLength: "Minimum 6 characters.",
+      },
+      confirmPassword: {
+        required: "Please confirm your password.",
+        mismatch: "Passwords do not match.",
+      },
+    },
+    forgotPassword: {
+      success: "If this email exists, a reset link has been sent.",
+      errors: {
+        default: "Something went wrong. Please try again.",
+      },
+    },
+    users: {
+      title: 'Users',
+      subtitle: 'Manage users and their roles',
+      totalUsers: 'Total users',
+      admins: 'Administrators',
+      standardUsers: 'Standard users',
+      userList: 'User list',
+      password: 'Password',
+      first_name: 'First name',
+      last_name: 'Last name',
+      selectRole: 'Select a role',
+      name: 'Name',
+      email: 'Email',
+      country: 'Country',
+      state: 'State',
+      number: 'Phone number',
+      role: 'Role',
+      joinDate: 'Join date',
+      admin: 'Administrator',
+      user: 'User',
+      permissions: 'Permissions',
+      manage_user: 'User Management',
+      addUser: 'Add user',
+      add_success: 'User created successfully',
+      add_error: 'Error creating user',
+      editUser: 'Edit user',
+      deleteUser: 'Delete user',
+      deleteConfirmDesc: 'Are you sure you want to delete this user? This action cannot be undone.',
+      deleteConfirmTitle: 'Confirm deletion',
+      saveSuccess: 'User updated successfully',
+      saveError: 'Error updating user',
     },
   },
 };

@@ -17,7 +17,18 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req) {
-    return this.authService.login(req.user);
+    const token = await this.authService.login(req.user);
+
+    return {
+      status: 200,
+      message: 'Login successful',
+      response: token,
+    };
+  }
+
+  @Post('refresh')
+  async refresh(@Body('refresh_token') refreshToken: string) {
+    return this.authService.refresh(refreshToken);
   }
 
   @Public()

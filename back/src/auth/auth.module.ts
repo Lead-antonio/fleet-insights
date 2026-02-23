@@ -31,7 +31,7 @@ import { MailService } from 'src/mail/mail.service';
         const secret = config.get<string>('JWT_SECRET') ?? 'default_secret';
         return {
           secret,
-          signOptions: { expiresIn: '1h' },
+          signOptions: { expiresIn: '15m' },
         };
       },
     }),
@@ -40,6 +40,7 @@ import { MailService } from 'src/mail/mail.service';
       provide: APP_GUARD,
       useClass: AuthGuard,
     }],
-  controllers: [AuthController]
+  controllers: [AuthController],
+  exports: [JwtModule],
 })
 export class AuthModule {}

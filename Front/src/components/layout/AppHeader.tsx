@@ -9,9 +9,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function AppHeader() {
   const { language, setLanguage, t } = useLanguage();
+  const {user} = useAuth();
+
+  const initials = `${user?.first_name?.charAt(0)}${user?.last_name?.charAt(0)}`;
 
   return (
     <header className="h-16 border-b border-border bg-card flex items-center justify-between px-4 gap-4">
@@ -60,9 +64,9 @@ export function AppHeader() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center text-white font-medium">
-          A
-        </div>
+         <a href="/profile" className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center text-white font-medium hover:opacity-90 transition-opacity">
+          {initials}
+         </a>
       </div>
     </header>
   );

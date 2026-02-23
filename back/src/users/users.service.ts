@@ -5,6 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dtos/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { Role } from 'src/roles/entity/role.entity';
+import { UpdateUserDto } from './dtos/update-user.dto';
+import { UpdateProfileDto } from './dtos/update-profile.dto';
 
 @Injectable()
 export class UsersService {
@@ -27,7 +29,40 @@ export class UsersService {
 
         const user = new User();
         user.email = createUserDto.email;
-        user.full_name = createUserDto.full_name;
+        user.first_name = createUserDto.first_name;
+        user.last_name = createUserDto.last_name;
+        user.number = createUserDto.number;
+        user.country = createUserDto.country;
+        user.state = createUserDto.state;
+        user.is_active = false; 
+
+         if (createUserDto.role_id) {
+            const role = await this.rolesRepository.findOne({ where: { id: createUserDto.role_id } });
+            if (role) user.role = role;
+        }
+        
+        const salt = await bcrypt.genSalt();
+        user.password = await bcrypt.hash(createUserDto.password, salt);
+
+        return this.usersRepository.save(user);
+    }
+
+    async signup(createUserDto: CreateUserDto): Promise<User> {
+        const exists = await this.usersRepository.findOne({
+            where: { email: createUserDto.email },
+        });
+
+        if (exists) {
+            throw new ConflictException({code: 'EMAIL_ALREADY_EXISTS'});
+        }
+
+        const user = new User();
+        user.email = createUserDto.email;
+        user.first_name = createUserDto?.first_name;
+        user.last_name = createUserDto?.last_name;
+        user.number = createUserDto?.number;
+        user.country = createUserDto?.country;
+        user.state = createUserDto?.state;
         user.is_active = false; 
         
         const salt = await bcrypt.genSalt();
@@ -72,12 +107,52 @@ export class UsersService {
         await this.usersRepository.delete(id);
     }
 
-    async updateProfile(userId: number, data: Partial<User>) {
-        await this.usersRepository.update(userId, data);
-        return this.usersRepository.findOne({ where: { id: userId } });
+    async updateProfile(userId: number, dto: UpdateProfileDto) {
+        await this.usersRepository.update(userId, dto);
+
+        const updatedUser = await this.usersRepository.findOne({
+            where: { id: userId },
+            relations: ['role', 'role.permissions'],
+        });
+
+        if (!updatedUser) return null;
+
+        const { password, ...result } = updatedUser;
+
+        return result;
     }
 
-    
+    async updateUser(id: number, dto: UpdateUserDto) {
+        const user = await this.usersRepository.findOne({ where: { id } });
+
+        if (!user) {
+            throw new NotFoundException('Utilisateur introuvable');
+        }
+
+        const { role_id, ...updateData } = dto;
+
+        await this.usersRepository.update(id, updateData);
+
+        if (role_id) {
+            const role = await this.rolesRepository.findOne({ where: { id: role_id } });
+            if (role) {
+            user.role = role;
+            await this.usersRepository.save(user);
+            }
+        }
+
+        const updatedUser = await this.usersRepository.findOne({
+            where: { id },
+            relations: ['role', 'role.permissions'],
+        });
+
+        if (!updatedUser) return null;
+
+        const { password, ...result } = updatedUser;
+
+        return result;
+    }
+
     async changePassword(userId: number, currentPassword: string, newPassword: string) {
         const user = await this.usersRepository.findOne({
             where: { id: userId },
@@ -89,12 +164,12 @@ export class UsersService {
 
         const isSamePassword = await bcrypt.compare(newPassword, user.password);
         if (isSamePassword) {
-            throw new BadRequestException('New password must be different from the current password');
+            throw new BadRequestException('New password must be different from the current password');   return { message: 'Password updated successfully' };
         }
 
         const isMatch = await bcrypt.compare(currentPassword, user.password);
         if (!isMatch) {
-            throw new BadRequestException('Current password is incorrect');
+            throw new BadRequestException('Current password is incorrect'); return { message: 'Current password is incorrect' };
         }
 
         user.password = await bcrypt.hash(newPassword, 10);

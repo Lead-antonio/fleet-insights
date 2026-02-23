@@ -4,6 +4,7 @@ import { UsersService } from './users.service';
 import { Public } from 'src/common/decarators/public.decorator';
 import { GetUser } from './decorators/get-user-decorator';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { UpdateProfileDto } from './dtos/update-profile.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { LocalAuthGuard } from 'src/auth/guards/local-auth.guard';
 
@@ -17,14 +18,26 @@ interface RequestWithUser extends Request {
 export class UsersController {
     constructor(private readonly usersService: UsersService) {}
 
-  @Public()
+
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
     const user = await this.usersService.create(createUserDto);
 
     return {
       status: 200,
-      message: 'Utilisateur créé avec succès',
+      message: 'add_success',
+      response: user,
+    };
+  }
+
+  @Public()
+  @Post("/signup")
+  async signup(@Body() createUserDto: CreateUserDto) {
+    const user = await this.usersService.signup(createUserDto);
+
+    return {
+      status: 200,
+      message: 'add_success',
       response: user,
     };
   }
@@ -41,27 +54,49 @@ export class UsersController {
     };
   }
 
-  @Get('me')
+  @Get('profile')
   async getProfile(@GetUser() user: any) {
-    const profile = await this.usersService.findOneWithRoleAndPermissions(user.userId);
-
+    const profile = await this.usersService.findOneWithRoleAndPermissions(user.sub);
+    if (!profile) {
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Profil non trouvé',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    const { password, ...safeUser } = profile;
     return {
       status: 200,
       message: 'Profil récupéré avec succès',
-      response: profile,
+        response: safeUser,
+    };
+  }
+
+  @Put('update-user/:id')
+  async updateUser(@Param('id') id:string, @Body() dto: UpdateUserDto) {
+    const updatedUser = await this.usersService.updateUser(parseInt(id), dto);
+
+    return {
+      status: 200,
+      message: 'saveSuccess',
+      response: updatedUser,
     };
   }
 
   @Put('update-profile')
-  async updateProfile(@Req() req, @Body() dto: UpdateUserDto) {
-    const updatedUser = await this.usersService.updateProfile(req.user.sub, dto);
+  async updateProfile(@GetUser() user: any, @Body() dto: UpdateProfileDto) {
+    const updatedUser = await this.usersService.updateProfile(user.sub, dto);
 
     return {
       status: 200,
-      message: 'Profil mis à jour avec succès',
+      message: 'saveSuccess',
       response: updatedUser,
     };
   }
+
+  
 
   @Put('change-password')
   async changePassword(@Req() req, @Body() dto: ChangePasswordDto) {

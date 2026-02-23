@@ -25,23 +25,25 @@ export class AuthGuard implements CanActivate {
     
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
+    console.log("TOKEN RECU:", token);
     if (!token) {
       throw new UnauthorizedException();
     }
     try {
       const payload = await this.jwtService.verifyAsync(token);
-
       const user = await this.usersService.findById(payload.sub);
 
       if (
         user.password_changed_at &&
         payload.iat * 1000 < user.password_changed_at.getTime()
       ) {
-        throw new UnauthorizedException('Token expired');
+        throw new UnauthorizedException(
+          'Password changed. Please login again.',
+        );
       }
 
       request['user'] = payload;
-    } catch {
+    } catch (err) {
       throw new UnauthorizedException();
     }
     return true;
