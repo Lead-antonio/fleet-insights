@@ -6,6 +6,7 @@ import { CreateUserDto } from './dtos/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { Role } from 'src/roles/entity/role.entity';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { UpdateProfileDto } from './dtos/update-profile.dto';
 
 @Injectable()
 export class UsersService {
@@ -34,6 +35,11 @@ export class UsersService {
         user.country = createUserDto.country;
         user.state = createUserDto.state;
         user.is_active = false; 
+
+         if (createUserDto.role_id) {
+            const role = await this.rolesRepository.findOne({ where: { id: createUserDto.role_id } });
+            if (role) user.role = role;
+        }
         
         const salt = await bcrypt.genSalt();
         user.password = await bcrypt.hash(createUserDto.password, salt);
@@ -101,7 +107,7 @@ export class UsersService {
         await this.usersRepository.delete(id);
     }
 
-    async updateProfile(userId: number, dto: UpdateUserDto) {
+    async updateProfile(userId: number, dto: UpdateProfileDto) {
         await this.usersRepository.update(userId, dto);
 
         const updatedUser = await this.usersRepository.findOne({
@@ -116,7 +122,27 @@ export class UsersService {
         return result;
     }
 
-    
+    async updateUser(id: number, dto: UpdateUserDto) {
+        const user = await this.usersRepository.findOne({ where: { id } });
+
+        if (!user) {
+            throw new NotFoundException('Utilisateur introuvable');
+        }
+
+        await this.usersRepository.update(id, dto);
+
+        const updatedUser = await this.usersRepository.findOne({
+            where: { id },
+            relations: ['role', 'role.permissions'],
+        });
+
+        if (!updatedUser) return null;
+
+        const { password, ...result } = updatedUser;
+
+        return result;
+    }
+
     async changePassword(userId: number, currentPassword: string, newPassword: string) {
         const user = await this.usersRepository.findOne({
             where: { id: userId },

@@ -49,9 +49,9 @@ const Profile = () => {
     e.preventDefault();
     // Simulate API call
     try {
-      await updateUser(editForm);
+      const response = await updateUser(editForm);
       setIsEditing(false);
-      toast.success(t.profile.saveSuccess);
+      toast.success(t.profile?.[response]);
     } catch (error) {
       toast.error(t.profile.saveError);
     }

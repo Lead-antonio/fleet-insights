@@ -1,3 +1,5 @@
+import { add } from "date-fns";
+
 export const translations = {
   fr: {
     // Navigation
@@ -169,6 +171,7 @@ export const translations = {
       km: 'km',
       liters: 'L',
       currency: 'MAD',
+      actions: 'Actions',
     },
     // Login
     login: {
@@ -255,6 +258,39 @@ export const translations = {
       errors: {
         default: "Une erreur est survenue. Veuillez réessayer.",
       },
+    },
+    users: {
+      title: 'Utilisateurs',
+      subtitle: 'Gérer les utilisateurs et leurs rôles',
+      totalUsers: 'Total utilisateurs',
+      admins: 'Administrateurs',
+      standardUsers: 'Utilisateurs standard',
+      userList: 'Liste des utilisateurs',
+      first_name: 'Prénom',
+      last_name: 'Nom',
+      password: 'Mot de passe',
+      selectRole: 'Sélectionner un rôle',
+      name: 'Nom',
+      email: 'Email',
+      country: 'Pays',
+      state: 'Ville',
+      number: 'Téléphone',
+      role: 'Rôle',
+      joinDate: "Date d'inscription",
+      admin: 'Administrateur',
+      user: 'Utilisateur',
+      permissions: 'Permissions',
+      manage_user: 'Gestion Utilisateurs',
+      actions: 'Actions',
+      add_success: 'Utilisateur créé avec succès',
+      add_error: 'Erreur lors de la création de l\'utilisateur',
+      addUser: 'Ajouter un utilisateur',
+      editUser: 'Modifier l\'utilisateur',
+      delete: 'Supprimer l\'utilisateur',
+      deleteConfirmDesc: 'Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.',
+      deleteConfirmTitle: 'Confirmer la suppression',
+      saveSuccess: 'Utilisateur mis à jour avec succès',
+      saveError: 'Erreur lors de la mise à jour de l\'utilisateur',
     },
   },
   en: {
@@ -427,6 +463,7 @@ export const translations = {
       km: 'km',
       liters: 'L',
       currency: 'MAD',
+      actions: 'Actions',
     },
     // Login
     login: {
@@ -513,6 +550,38 @@ export const translations = {
       errors: {
         default: "Something went wrong. Please try again.",
       },
+    },
+    users: {
+      title: 'Users',
+      subtitle: 'Manage users and their roles',
+      totalUsers: 'Total users',
+      admins: 'Administrators',
+      standardUsers: 'Standard users',
+      userList: 'User list',
+      password: 'Password',
+      first_name: 'First name',
+      last_name: 'Last name',
+      selectRole: 'Select a role',
+      name: 'Name',
+      email: 'Email',
+      country: 'Country',
+      state: 'State',
+      number: 'Phone number',
+      role: 'Role',
+      joinDate: 'Join date',
+      admin: 'Administrator',
+      user: 'User',
+      permissions: 'Permissions',
+      manage_user: 'User Management',
+      addUser: 'Add user',
+      add_success: 'User created successfully',
+      add_error: 'Error creating user',
+      editUser: 'Edit user',
+      deleteUser: 'Delete user',
+      deleteConfirmDesc: 'Are you sure you want to delete this user? This action cannot be undone.',
+      deleteConfirmTitle: 'Confirm deletion',
+      saveSuccess: 'User updated successfully',
+      saveError: 'Error updating user',
     },
   },
 };

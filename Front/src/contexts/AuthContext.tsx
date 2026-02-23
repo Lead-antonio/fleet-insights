@@ -24,7 +24,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   setUser: (user: any) => void;
-  updateUser: (data: any) => Promise<void>;
+  updateUser: (data: any) => Promise<string>;
   signUp: (data: any) => Promise<string>;
   login: (access: string, refresh: string) => Promise<void>;
   logout: () => void;
@@ -51,9 +51,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const updateUser = async (data: any) => {
     try {
       const res = await api.put("/users/update-profile", data);
-
       setUser(res.data.response);
-
+      return res.data.message;
     } catch (error) {
       console.error("Erreur update profile", error);
     }

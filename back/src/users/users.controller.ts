@@ -4,6 +4,7 @@ import { UsersService } from './users.service';
 import { Public } from 'src/common/decarators/public.decorator';
 import { GetUser } from './decorators/get-user-decorator';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { UpdateProfileDto } from './dtos/update-profile.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { LocalAuthGuard } from 'src/auth/guards/local-auth.guard';
 
@@ -24,7 +25,7 @@ export class UsersController {
 
     return {
       status: 200,
-      message: 'Utilisateur créé avec succès',
+      message: 'add_success',
       response: user,
     };
   }
@@ -36,7 +37,7 @@ export class UsersController {
 
     return {
       status: 200,
-      message: 'Utilisateur créé avec succès',
+      message: 'add_success',
       response: user,
     };
   }
@@ -73,11 +74,29 @@ export class UsersController {
     };
   }
 
-  @Put('update-profile')
-  async updateProfile(@GetUser() user: any, @Body() dto: UpdateUserDto) {
-    const updatedUser = await this.usersService.updateProfile(user.sub, dto);
-    return updatedUser;
+  @Put('update-user/:id')
+  async updateUser(@Param('id') id:string, @Body() dto: UpdateUserDto) {
+    const updatedUser = await this.usersService.updateUser(parseInt(id), dto);
+
+    return {
+      status: 200,
+      message: 'saveSuccess',
+      response: updatedUser,
+    };
   }
+
+  @Put('update-profile')
+  async updateProfile(@GetUser() user: any, @Body() dto: UpdateProfileDto) {
+    const updatedUser = await this.usersService.updateProfile(user.sub, dto);
+
+    return {
+      status: 200,
+      message: 'saveSuccess',
+      response: updatedUser,
+    };
+  }
+
+  
 
   @Put('change-password')
   async changePassword(@Req() req, @Body() dto: ChangePasswordDto) {

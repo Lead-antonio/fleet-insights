@@ -17,6 +17,7 @@ import Profile from "./pages/Profile";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import Users from "./pages/Users";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
                 <Route element={<ProtectedRoute />}>
                   <Route element={<SidebarProvider><AppLayout /></SidebarProvider>}>
                     <Route path="/" element={<Dashboard />} />
+                    <Route path="/users" element={<Users />} />
                      <Route path="/profile" element={<Profile />} />
                     <Route path="/vehicles" element={<Vehicles />} />
                     <Route path="/settings" element={<Settings />} />
