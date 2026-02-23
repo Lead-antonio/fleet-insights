@@ -28,12 +28,12 @@ export class UsersService {
         }
 
         const user = new User();
-        user.email = createUserDto.email;
-        user.first_name = createUserDto.first_name;
+        user.email = createUserDto?.email;
+        user.first_name = createUserDto?.first_name;
         user.last_name = createUserDto.last_name;
-        user.number = createUserDto.number;
-        user.country = createUserDto.country;
-        user.state = createUserDto.state;
+        user.number = createUserDto?.number;
+        user.country = createUserDto?.country;
+        user.state = createUserDto?.state;
         user.is_active = false; 
 
          if (createUserDto.role_id) {
@@ -123,6 +123,7 @@ export class UsersService {
     }
 
     async updateUser(id: number, dto: UpdateUserDto) {
+        console.log('Updating user with ID:', id, 'and data:', dto);
         const user = await this.usersRepository.findOne({ where: { id } });
 
         if (!user) {
@@ -131,16 +132,23 @@ export class UsersService {
 
         const { role_id, ...updateData } = dto;
 
-        await this.usersRepository.update(id, updateData);
+        Object.assign(user, {
+            email: updateData.email ?? user.email,
+            first_name: updateData.first_name ?? user.first_name,
+            last_name: updateData.last_name ?? user.last_name,
+            number: updateData.number ?? user.number,
+            country: updateData.country ?? user.country,
+            state: updateData.state ?? user.state,
+        });
 
         if (role_id) {
             const role = await this.rolesRepository.findOne({ where: { id: role_id } });
             if (role) {
-            user.role = role;
-            await this.usersRepository.save(user);
+                user.role = role;
             }
         }
-
+        
+        await this.usersRepository.save(user);
         const updatedUser = await this.usersRepository.findOne({
             where: { id },
             relations: ['role', 'role.permissions'],
