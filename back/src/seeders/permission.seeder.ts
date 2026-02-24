@@ -5,6 +5,7 @@ export const permissionSeeder = async (dataSource: DataSource) => {
   const repo = dataSource.getRepository(Permission);
 
   const permissions = [
+    { name: 'dashboard.read',   description: 'Voir le tableau de bord' },
     // ── Users ──────────────────────────────────────────────────────────────
     { name: 'user.read',   description: 'Voir la liste des utilisateurs' },
     { name: 'user.create', description: 'Créer un utilisateur' },

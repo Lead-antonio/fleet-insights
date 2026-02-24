@@ -21,6 +21,7 @@ export const roleSeeder = async (dataSource: DataSource) => {
     {
       name: 'Manager',
       permissions: getPerms(
+        'dashboard.read',
         'user.read', 'user.create', 'user.update',
         'role.read',
         'permission.read',
@@ -29,6 +30,7 @@ export const roleSeeder = async (dataSource: DataSource) => {
     {
       name: 'Utilisateur',
       permissions: getPerms(
+        'dashboard.read',
         'user.read',
       ),
     },
