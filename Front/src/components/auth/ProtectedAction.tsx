@@ -1,43 +1,30 @@
-import { ReactNode, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { ReactNode } from 'react';
 import { usePermissions } from '@/hooks/use-permissions';
 
-interface ProtectedPageProps {
+interface ProtectedActionProps {
   permission: string;
   children: ReactNode;
-  /** Page vers laquelle rediriger si pas la permission (défaut: "/") */
-  redirectTo?: string;
+  /** Optionnel : ce qui s'affiche si pas la permission (défaut: rien) */
+  fallback?: ReactNode;
 }
 
 /**
- * Redirige automatiquement si l'user n'a pas la permission d'accéder à la page.
- * L'ADMIN bypass toutes les restrictions.
+ * Cache son contenu si l'user n'a pas la permission requise.
  *
  * @example
- * <Route
- *   path="/users"
- *   element={
- *     <ProtectedPage permission="user.read" redirectTo="/dashboard">
- *       <UsersPage />
- *     </ProtectedPage>
- *   }
- * />
+ * <ProtectedAction permission="user.create">
+ *   <Button>Créer</Button>
+ * </ProtectedAction>
+ *
+ * <ProtectedAction permission="user.delete" fallback={<span>—</span>}>
+ *   <Button variant="ghost"><Trash2 /></Button>
+ * </ProtectedAction>
  */
-export const ProtectedPage = ({
+export const ProtectedAction = ({
   permission,
   children,
-  redirectTo = '/',
-}: ProtectedPageProps) => {
-  const { can, isAdmin } = usePermissions();
-  const navigate = useNavigate();
-  const hasAccess = isAdmin || can(permission);
-
-  useEffect(() => {
-    if (!hasAccess) {
-      navigate(redirectTo, { replace: true });
-    }
-  }, [hasAccess, redirectTo, navigate]);
-
-  if (!hasAccess) return null;
-  return <>{children}</>;
+  fallback = null,
+}: ProtectedActionProps) => {
+  const { can } = usePermissions();
+  return can(permission) ? <>{children}</> : <>{fallback}</>;
 };
