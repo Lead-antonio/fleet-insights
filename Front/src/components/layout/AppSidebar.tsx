@@ -1,4 +1,4 @@
-import { LayoutDashboard, Car, Settings, LogOut, UserCircle, Users, ChevronDown, UserCog } from 'lucide-react';
+import { LayoutDashboard, Car, Settings, LogOut, UserCircle, Users, ChevronDown, UserCog, Shield, Lock } from 'lucide-react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
@@ -15,8 +15,11 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 import { useState } from 'react';
+import { usePermissions } from '@/hooks/use-permissions';
+import { permission } from 'process';
 
 export function AppSidebar() {
+  const { can, isAdmin  } = usePermissions();
   const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,22 +34,33 @@ export function AppSidebar() {
 
 
   const menuItems = [
-    { title: t.nav.dashboard, url: '/', icon: LayoutDashboard },
-    { title: t.profile.title, url: '/profile', icon: UserCircle },
-    { title: t.nav.vehicles, url: '/vehicles', icon: Car },
-    { title: t.nav.settings, url: '/settings', icon: Settings },
+    { title: t.nav.dashboard, url: '/', icon: LayoutDashboard, permission: 'dashboard.read' },
+    { title: t.profile.title, url: '/profile', icon: UserCircle, permission: 'user.read' },
+    { title: t.nav.vehicles, url: '/vehicles', icon: Car, permission: 'vehicle.read' },
+    { title: t.nav.settings, url: '/settings', icon: Settings, permission: 'settings.read' },
   ];
 
   const adminSubItems = [
-    { title: t.users.title, url: '/users', icon: Users },
+    { title: t.users.title, url: '/users', icon: Users, permission: 'user.read' },
+    {title: t.roles.title, url: '/roles', icon: Shield, permission: 'role.read' },
+    {title: t.permissions.title, url: '/permissions', icon: Lock, permission: 'permission.read' },
   ];
+
+  const filteredMenuItems = menuItems.filter(item => {
+    if (!item.permission) return true;
+    return isAdmin || can(item.permission);
+  });
+
+  const filteredAdminSubItems = adminSubItems.filter(item =>
+    isAdmin || can(item.permission)
+  );
 
   return (
     <Sidebar className="border-r border-sidebar-border">
       <SidebarHeader className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center">
-            <Car className="w-6 h-6 text-white" />
+          <div className="w-10 h-10 rounded-lg  flex items-center justify-center">
+            <img src="/m-tec.png" alt="" />
           </div>
           <div>
             <h1 className="font-bold text-lg text-sidebar-foreground">M-TEC</h1>
@@ -59,7 +73,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
+              {filteredMenuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
@@ -88,7 +102,7 @@ export function AppSidebar() {
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenu className="pl-4">
-                      {adminSubItems.map((item) => (
+                      {filteredAdminSubItems.map((item) => (
                         <SidebarMenuItem key={item.title}>
                           <SidebarMenuButton
                             asChild

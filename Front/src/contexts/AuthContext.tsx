@@ -18,6 +18,7 @@ interface User {
   state?: string;
   role?: {
     name: string;
+    permissions: { name: string }[];
   };
 }
 
@@ -76,6 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       const res = await api.get("/users/profile");
+      console.log("User profile loaded:", res.data.response);
       setUser(prev => ({ ...prev, ...res.data.response }));
     } catch (err) {
       console.log("Token invalide");

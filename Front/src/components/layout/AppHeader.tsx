@@ -21,13 +21,13 @@ export function AppHeader() {
     <header className="h-16 border-b border-border bg-card flex items-center justify-between px-4 gap-4">
       <div className="flex items-center gap-4">
         <SidebarTrigger />
-        <div className="relative hidden md:block">
+        {/* <div className="relative hidden md:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder={t.header.search}
             className="pl-10 w-64 bg-background"
           />
-        </div>
+        </div> */}
       </div>
 
       <div className="flex items-center gap-2">

@@ -178,6 +178,26 @@ const Users = () => {
     }
   };
 
+  const getBadgeVariant = (name: string):
+  | "default"
+  | "secondary"
+  | "destructive"
+  | "outline" => {
+  const key = name.toLowerCase();
+  switch (key) {
+    case "administrateur":
+      return "default";
+    case "utilisateur":
+    case "user":
+      return "secondary";
+    case "root":
+    case "manager":
+      return "destructive";
+    default:
+      return "outline";
+  }
+};
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -278,8 +298,8 @@ const Users = () => {
                     <TableCell>{u.country}, {u.state}</TableCell>
                     <TableCell>{u.number || '—'}</TableCell>
                     <TableCell>
-                      <Badge variant={u.role?.name === 'Administrateur' ? 'default' : 'secondary'}>
-                        {u.role?.name === 'Administrateur' ? t.users.admin : t.users.user}
+                      <Badge variant={getBadgeVariant(u.role?.name)}>
+                        {t.users[u.role?.name] || u.role?.name || '—'}
                       </Badge>
                     </TableCell>
                     <TableCell>

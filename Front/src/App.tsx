@@ -18,6 +18,9 @@ import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Users from "./pages/Users";
+import Roles from "./pages/Roles";
+import Permissions from "./pages/Permissions";
+import { ProtectedPage } from "./components/auth/ProtectedPage";
 
 const queryClient = new QueryClient();
 
@@ -38,8 +41,22 @@ const App = () => (
                 <Route element={<ProtectedRoute />}>
                   <Route element={<SidebarProvider><AppLayout /></SidebarProvider>}>
                     <Route path="/" element={<Dashboard />} />
-                    <Route path="/users" element={<Users />} />
-                     <Route path="/profile" element={<Profile />} />
+                    <Route path="/users" 
+                      element={
+                        <ProtectedPage permission="user.read" redirectTo="/dashboard">
+                          <Users />
+                        </ProtectedPage>
+                      } 
+                    />
+                    <Route path="/roles" 
+                      element={
+                        <ProtectedPage permission="role.read" redirectTo="/dashboard">
+                          <Roles />
+                        </ProtectedPage>
+                      } 
+                    />
+                    <Route path="/permissions" element={<Permissions />} />
+                    <Route path="/profile" element={<Profile />} />
                     <Route path="/vehicles" element={<Vehicles />} />
                     <Route path="/settings" element={<Settings />} />
                   </Route>
