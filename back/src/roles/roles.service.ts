@@ -76,7 +76,7 @@ export class RolesService {
       const permissions = await this.permissionRepo.findBy({
         id: In(dto.permissionIds),
       });
-      role.permissions = [...role.permissions, ...permissions];
+      role.permissions = permissions;
     }
 
     if (dto.name) role.name = dto.name;
@@ -91,12 +91,12 @@ export class RolesService {
 
   async syncAdminPermissions() {
     const adminRole = await this.roleRepo.findOne({
-      where: { name: 'Admin' },
+      where: { name: 'Administrateur' },
       relations: ['permissions'], // charge les permissions existantes
     });
 
     if (!adminRole) {
-      throw new NotFoundException('Le rôle admin est introuvable');
+      throw new NotFoundException('Le rôle administrateur est introuvable');
     }
 
     // Récupérer toutes les permissions existantes

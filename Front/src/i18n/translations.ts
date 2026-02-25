@@ -299,6 +299,7 @@ export const translations = {
     roles: {
       title: 'Rôles',
       subtitle: 'Consulter les rôles et leurs permissions',
+      viewRole: 'Voir les permissions du rôle',
       adminDesc: 'Accès complet à toutes les fonctionnalités du système',
       userDesc: 'Accès en lecture seule aux données de base',
       permissionsMatrix: 'Matrice des permissions',
@@ -319,6 +320,7 @@ export const translations = {
     permissions: {
       title: 'Permissions',
       subtitle: 'Consulter les permissions et leurs modules associés',
+      viewPermission: 'Voir les détails de la permission',
       name: 'Nom',
       module: 'Module',
       search: 'Rechercher une permission',
@@ -639,6 +641,7 @@ export const translations = {
     roles: {
       title: 'Roles',
       subtitle: 'View roles and their permissions',
+      viewRole: 'View role permissions',
       adminDesc: 'Full access to all system features',
       userDesc: 'Read-only access to basic data',
       permissionsMatrix: 'Permissions matrix',
@@ -659,6 +662,7 @@ export const translations = {
     permissions: {
       title: 'Permissions',
       subtitle: 'View permissions and their associated modules',
+      viewPermission: 'View permission details',
       name: 'Name',
       search: 'Search for a permission',
       createTitle: 'Create a permission',

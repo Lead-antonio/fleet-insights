@@ -18,11 +18,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from '@/components/ui/dialog';
-import { Shield, UserCircle, Pencil, BarChart2, Users, ShieldCheck, Loader2 } from 'lucide-react';
+import { Shield, UserCircle, Pencil, BarChart2, Users, ShieldCheck, Loader2, ChevronDown, ChevronRight, Eye, Trash2 } from 'lucide-react';
 import { Role } from '@/types/roles.types';
 import { rolesService } from '@/services/roles.service';
 import { toast } from '@/components/ui/sonner';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { ProtectedAction } from '@/components/auth/ProtectedAction';
 
 
 const groupPermissionsByModule = (permissions: Role['permissions']) => {
@@ -62,14 +65,33 @@ export default function Roles() {
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRole, setSelectedRole] = useState<number | null>(null);
+  const [openModules, setOpenModules] = useState<Record<string, boolean>>({});
+  const [readOnly, setReadOnly] = useState(false);
+  const [roleToDelete, setRoleToDelete] = useState<number | null>(null);
 
+  const allPermissions = roles.reduce((acc, r) => {
+    r.permissions.forEach(p => {
+      if (!acc.some((perm) => perm.id === p.id)) { 
+        acc.push(p);
+      }
+    });
+    return acc;
+  }, [] as Role['permissions']);
   const currentRole = roles.find((r) => r.id === selectedRole) ?? null;
-  const groupedPermissions = currentRole ? groupPermissionsByModule(currentRole.permissions) : {};
+  const groupedPermissions = currentRole ? groupPermissionsByModule(allPermissions) : {};
+  const [selectedPermissions, setSelectedPermissions] = useState<Set<string>>(new Set());
 
 
   const totalRoles = roles.length;
   const totalPermissions = roles.reduce((acc, r) => acc + r.permissions.length, 0);
   const avgPermissions = totalRoles > 0 ? (totalPermissions / totalRoles).toFixed(1) : '0';
+
+  const toggleModule = (module: string) => {
+    setOpenModules((prev) => ({
+      ...prev,
+      [module]: !prev[module],
+    }));
+  };
 
   const fetchRoles = useCallback(async () => {
     try {
@@ -88,6 +110,46 @@ export default function Roles() {
   useEffect(() => {
     fetchRoles();
   }, [fetchRoles]);
+
+  useEffect(() => {
+    if (currentRole) {
+      setSelectedPermissions(new Set(currentRole.permissions.map((p) => String(p.id))));
+    } else {
+      setSelectedPermissions(new Set());
+    }
+  }, [currentRole]);
+
+  const handleSave = async () => {
+    if (!currentRole) return;
+    try {
+      await rolesService.update(currentRole.id, { permissionIds: Array.from(selectedPermissions).map(Number), });
+      toast.success('Permissions mises à jour avec succès', {
+        style: { background: '#22c55e', color: 'white', border: '1px solid #16a34a' },
+      });
+      fetchRoles();
+      setSelectedRole(null);
+    } catch (err: any) {
+      toast.error(t.roles?.[err.response?.data?.message] ?? 'Erreur lors de la mise à jour', {
+        style: { background: '#ef4444', color: 'white', border: '1px solid #dc2626' },
+      });
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      await rolesService.delete(id);
+      toast.success('Rôle supprimé avec succès', {
+        style: { background: '#22c55e', color: 'white', border: '1px solid #16a34a' },
+      });
+      fetchRoles();
+    } catch (err: any) {
+      toast.error(t.roles?.[err.response?.data?.message] ?? 'Erreur lors de la suppression', {
+        style: { background: '#ef4444', color: 'white', border: '1px solid #dc2626' },
+      });
+    } finally {
+      setRoleToDelete(null);
+    }
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -191,9 +253,30 @@ export default function Roles() {
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">{new Date(role.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell className="text-center">
-                      <Button variant="ghost" size="icon" onClick={() => setSelectedRole(role.id)}>
-                        <Pencil className="w-4 h-4" />
-                      </Button>
+                      <div className="flex items-center justify-center gap-1">
+
+                        {/* Voir */}
+                        <ProtectedAction permission="role.read">
+                          <Button variant="ghost" size="icon" onClick={() => { setSelectedRole(role.id); setReadOnly(true); }}>
+                            <Eye className="w-4 h-4 text-muted-foreground" />
+                          </Button>
+                        </ProtectedAction>
+
+                        {/* Modifier */}
+                        <ProtectedAction permission="role.update">
+                          <Button variant="ghost" size="icon" onClick={() => { setSelectedRole(role.id); setReadOnly(false); }}>
+                            <Pencil className="w-4 h-4 text-primary" />
+                          </Button>
+                        </ProtectedAction>
+
+                        {/* Supprimer */}
+                        <ProtectedAction permission="role.delete">
+                          <Button variant="ghost" size="icon" onClick={() => setRoleToDelete(role.id)}>
+                            <Trash2 className="w-4 h-4 text-destructive" />
+                          </Button>
+                        </ProtectedAction>
+
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -213,7 +296,7 @@ export default function Roles() {
               ) : (
                 <UserCircle className="w-5 h-5 text-primary" />
               )}
-              {t.roles.editRole} — {currentRole?.name}
+               {readOnly ? t.roles.viewRole : t.roles.editRole} — {currentRole?.name}
             </DialogTitle>
             <DialogDescription>
               {currentRole?.permissions.length} permission(s) assignée(s)
@@ -221,24 +304,95 @@ export default function Roles() {
           </DialogHeader>
 
           <div className="space-y-5 mt-2">
-            {Object.entries(groupedPermissions).map(([module, perms]) => (
-              <div key={module} className="space-y-3">
-                <h4 className="font-semibold text-sm capitalize">{module}</h4>
-                <div className="grid grid-cols-1 gap-2 pl-2">
-                  {perms.map((perm) => (
-                    <div key={perm.id} className="flex items-center justify-between py-1">
-                      <Label className="text-sm text-muted-foreground">
-                        {perm.description ?? perm.action}
-                      </Label>
-                      <Switch checked={true} disabled />
+            {Object.entries(groupedPermissions).map(([module, perms]) => {
+              const isOpen = openModules[module];
+
+              return (
+                <div key={module} className="space-y-3 border rounded-md p-3">
+                  
+                  {/* HEADER CLIQUABLE */}
+                  <div
+                    onClick={() => toggleModule(module)}
+                    className="flex items-center justify-between cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      {isOpen ? (
+                        <ChevronDown size={16} />
+                      ) : (
+                        <ChevronRight size={16} />
+                      )}
+                      <h4 className="font-semibold text-sm capitalize">
+                        {module}
+                      </h4>
                     </div>
-                  ))}
+
+                    <span className="text-xs text-muted-foreground">
+                      {perms.length} permissions
+                    </span>
+                  </div>
+
+                  {/* CONTENU EXPANDABLE */}
+                  {isOpen && (
+                    <div className="grid grid-cols-1 gap-2 pl-6 pt-2">
+                      {perms.map((perm) => (
+                        <div
+                          key={perm.id}
+                          className="flex items-center justify-between py-1"
+                        >
+                          <Label className="text-sm text-muted-foreground">
+                            {perm.description ?? perm.action}
+                          </Label>
+                          <Switch 
+                              checked={selectedPermissions.has(String(perm.id))}
+                              disabled={readOnly}
+                              onCheckedChange={(checked) => {
+                              setSelectedPermissions((prev) => {
+                                const updated = new Set(prev);
+                                checked ? updated.add(String(perm.id)) : updated.delete(String(perm.id));
+                                return updated;
+                              });
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setSelectedRole(null)}>
+              {readOnly ? 'Fermer' : 'Annuler'}
+            </Button>
+            {!readOnly && (
+              <Button onClick={handleSave}>Sauvegarder</Button>
+            )}
+          </DialogFooter>
+          
         </DialogContent>
+        
       </Dialog>
+
+      <AlertDialog open={!!roleToDelete} onOpenChange={(open) => !open && setRoleToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer ce rôle ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible. Le rôle sera définitivement supprimé.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90"
+              onClick={handleDelete.bind(null, roleToDelete!)}
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -8,6 +8,7 @@ export const permissionSeeder = async (dataSource: DataSource) => {
     { name: 'dashboard.read',   description: 'Voir le tableau de bord' },
     // ── Users ──────────────────────────────────────────────────────────────
     { name: 'user.read',   description: 'Voir la liste des utilisateurs' },
+    { name: 'user.profile',   description: 'Voir le profil d\'un utilisateur' },
     { name: 'user.create', description: 'Créer un utilisateur' },
     { name: 'user.update', description: 'Modifier un utilisateur' },
     { name: 'user.delete', description: 'Supprimer un utilisateur' },

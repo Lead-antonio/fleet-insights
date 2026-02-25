@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import {
   ShieldCheck, Pencil, Trash2, Plus, Loader2,
   LayoutGrid, KeyRound, Search,
+  Eye,
 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +26,7 @@ import {
 } from '@/services/permissions.service';
 import { Permission } from '@/types/roles.types';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { ProtectedAction } from '@/components/auth/ProtectedAction';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 const getModule = (name: string) => name.split('.')[0] ?? name;
@@ -41,6 +43,7 @@ export default function Permissions() {
   const [submitting, setSubmitting]       = useState(false);
 
   // ── State modals ───────────────────────────────────────────────────────────
+   const [readOnly, setReadOnly] = useState(false);
   const [createOpen, setCreateOpen]               = useState(false);
   const [editPermission, setEditPermission]       = useState<Permission | null>(null);
   const [deletePermission, setDeletePermission]   = useState<Permission | null>(null);
@@ -264,16 +267,25 @@ export default function Permissions() {
                     </TableCell>
                     <TableCell className="text-center">
                       <div className="flex items-center justify-center gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => openEdit(perm)}>
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost" size="icon"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => setDeletePermission(perm)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                        <ProtectedAction permission="role.read">
+                          <Button variant="ghost" size="icon" onClick={() => { openEdit(perm); setReadOnly(true); }}>
+                            <Eye className="w-4 h-4 text-muted-foreground" />
+                          </Button>
+                        </ProtectedAction>
+                        <ProtectedAction permission="permission.update">
+                          <Button variant="ghost" size="icon" onClick={() => openEdit(perm)}>
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                        </ProtectedAction>
+                        <ProtectedAction permission="permission.delete">  
+                          <Button
+                            variant="ghost" size="icon"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => setDeletePermission(perm)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </ProtectedAction>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -339,7 +351,7 @@ export default function Permissions() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Pencil className="w-5 h-5 text-primary" />
-              {t.permissions?.editTitle ?? 'Modifier la permission'}
+              {readOnly ? t.permissions?.viewPermission  : t.permissions?.editTitle}
             </DialogTitle>
             <DialogDescription>ID : #{editPermission?.id}</DialogDescription>
           </DialogHeader>
@@ -350,6 +362,7 @@ export default function Permissions() {
               </Label>
               <Input
                 placeholder="ex: user.create"
+                disabled={readOnly}
                 value={editForm.name}
                 onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))}
                 onKeyDown={(e) => e.key === 'Enter' && handleEdit()}
@@ -359,6 +372,7 @@ export default function Permissions() {
               <Label>{t.permissions?.description ?? 'Description'}</Label>
               <Input
                 placeholder="ex: Créer un utilisateur"
+                disabled={readOnly}
                 value={editForm.description}
                 onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
                 onKeyDown={(e) => e.key === 'Enter' && handleEdit()}
@@ -369,10 +383,12 @@ export default function Permissions() {
             <Button variant="outline" onClick={() => setEditPermission(null)} disabled={submitting}>
               Annuler
             </Button>
+            {!readOnly && (
             <Button onClick={handleEdit} disabled={submitting || !editForm.name?.trim()} className="gap-2">
               {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
               Enregistrer
             </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
