@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Users as UsersIcon, Shield, UserCircle, MoreHorizontal, Trash2, Pencil, Plus } from 'lucide-react';
+import { Search, Users as UsersIcon, Shield, UserCircle, MoreHorizontal, Trash2, Pencil, Plus, Eye } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -28,6 +28,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { toast } from '@/components/ui/sonner';
+import { ProtectedAction } from '@/components/auth/ProtectedAction';
 
 interface Permission {
   id: string;
@@ -61,7 +62,7 @@ const Users = () => {
   const [search, setSearch] = useState('');
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [readOnly, setReadOnly] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -117,14 +118,6 @@ const Users = () => {
     (u.state || '').toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleRoleChange = async (userId: number, newRole: string) => {
-    try {
-      await api.put(`/users/${userId}/role`, { role: newRole });
-      await fetchUsers();
-    } catch (err) {
-      console.error('Error:', err);
-    }
-  };
 
   const handleCreate = async () => {
     try {
@@ -272,7 +265,7 @@ const Users = () => {
                   <TableHead></TableHead>
                   <TableHead>{t.users.name}</TableHead>
                   <TableHead>{t.users.email}</TableHead>
-                  <TableHead>{t.users.country}</TableHead>
+                  {/* <TableHead>{t.users.country}</TableHead> */}
                   <TableHead>{t.users.number}</TableHead>
                   <TableHead>{t.users.role}</TableHead>
                   <TableHead>{t.users.joinDate}</TableHead>
@@ -295,7 +288,7 @@ const Users = () => {
                         : '—'}
                     </TableCell>
                     <TableCell>{u.email}</TableCell>
-                    <TableCell>{u.country}, {u.state}</TableCell>
+                    {/* <TableCell>{u.country}, {u.state}</TableCell> */}
                     <TableCell>{u.number || '—'}</TableCell>
                     <TableCell>
                       <Badge variant={getBadgeVariant(u.role?.name)}>
@@ -307,26 +300,25 @@ const Users = () => {
                     </TableCell>
                     {u.id !== user?.id && (
                     <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => { setSelectedUser(u); setEditDialogOpen(true); }}>
-                            <Pencil className="w-4 h-4 mr-2" />
-                            {t.common.edit}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => { setSelectedUser(u); setDeleteDialogOpen(true); }}
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            {t.common.delete}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <ProtectedAction permission="user.read">
+                        <Button variant="ghost" size="icon" onClick={() => { setSelectedUser(u); setEditDialogOpen(true); setReadOnly(true); }}>
+                          <Eye className="w-4 h-4 text-muted-foreground" />
+                        </Button>
+                      </ProtectedAction>
+
+                      {/* Modifier */}
+                      <ProtectedAction permission="user.update">
+                        <Button variant="ghost" size="icon" onClick={() => { setSelectedUser(u); setEditDialogOpen(true); setReadOnly(false);}}>
+                          <Pencil className="w-4 h-4 text-primary" />
+                        </Button>
+                      </ProtectedAction>
+
+                      {/* Supprimer */}
+                      <ProtectedAction permission="user.delete">
+                        <Button variant="ghost" size="icon" onClick={() => { setSelectedUser(u); setDeleteDialogOpen(true); setReadOnly(false); }}>
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      </ProtectedAction>
                     </TableCell>
                   )}
                   </TableRow>
@@ -359,7 +351,7 @@ const Users = () => {
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t.users.editUser}</DialogTitle>
+            <DialogTitle>{readOnly ? t.users.viewUser : t.users.editUser} — {selectedUser?.first_name} {selectedUser?.last_name}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-2 gap-4">
@@ -367,6 +359,7 @@ const Users = () => {
                 <Label>{t.users.first_name}</Label>
                 <Input
                   defaultValue={selectedUser?.first_name || ''}
+                  disabled={readOnly}
                   onChange={(e) => setSelectedUser(prev => prev ? { ...prev, first_name: e.target.value } : null)}
                 />
               </div>
@@ -374,6 +367,7 @@ const Users = () => {
                 <Label>{t.users.last_name}</Label>
                 <Input
                   defaultValue={selectedUser?.last_name || ''}
+                  disabled={readOnly}
                   onChange={(e) => setSelectedUser(prev => prev ? { ...prev, last_name: e.target.value } : null)}
                 />
               </div>
@@ -384,6 +378,7 @@ const Users = () => {
                 <Label>{t.users.email}</Label>
                 <Input
                   defaultValue={selectedUser?.email || ''}
+                  disabled={readOnly}
                   onChange={(e) => setSelectedUser(prev => prev ? { ...prev, email: e.target.value } : null)}
                 />
               </div>
@@ -391,6 +386,7 @@ const Users = () => {
                 <Label>{t.users.number}</Label>
                 <Input
                   defaultValue={selectedUser?.number || ''}
+                  disabled={readOnly}
                   onChange={(e) => setSelectedUser(prev => prev ? { ...prev, number: e.target.value } : null)}
                 />
               </div>
@@ -401,6 +397,7 @@ const Users = () => {
                 <Label>{t.users.country}</Label>
                 <Input
                   defaultValue={selectedUser?.country || ''}
+                  disabled={readOnly}
                   onChange={(e) => setSelectedUser(prev => prev ? { ...prev, country: e.target.value } : null)}
                 />
               </div>
@@ -408,6 +405,7 @@ const Users = () => {
                 <Label>{t.users.state}</Label>
                 <Input
                   defaultValue={selectedUser?.state || ''}
+                  disabled={readOnly}
                   onChange={(e) => setSelectedUser(prev => prev ? { ...prev, state: e.target.value } : null)}
                 />
               </div>
@@ -418,6 +416,7 @@ const Users = () => {
               <Select
                 value={selectedUser?.role?.id?.toString() || ''}
                 onValueChange={(val) => setSelectedUser(prev => prev ? { ...prev, role: { ...prev.role, id: parseInt(val) } } : null)}
+                disabled={readOnly}
               >
                 <SelectTrigger>
                   <SelectValue placeholder={t.users.selectRole} />
@@ -434,8 +433,12 @@ const Users = () => {
             
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>{t.common.cancel}</Button>
-            <Button onClick={() => handleEdit(selectedUser!)}>{t.common.save}</Button>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+              {readOnly ? t.common.close : t.common.cancel}
+            </Button>
+            {!readOnly && (
+              <Button onClick={() => handleEdit(selectedUser!)}>{t.common.save}</Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

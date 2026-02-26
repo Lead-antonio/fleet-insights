@@ -363,10 +363,10 @@ export default function Roles() {
           </div>
           <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setSelectedRole(null)}>
-              {readOnly ? 'Fermer' : 'Annuler'}
+              {readOnly ? t.common.close : t.common.cancel}
             </Button>
             {!readOnly && (
-              <Button onClick={handleSave}>Sauvegarder</Button>
+              <Button onClick={handleSave}>{t.common.save}</Button>
             )}
           </DialogFooter>
           

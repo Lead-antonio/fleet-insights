@@ -262,6 +262,7 @@ export const translations = {
     users: {
       title: 'Utilisateurs',
       subtitle: 'Gérer les utilisateurs et leurs rôles',
+      viewUser: 'Voir l\'utilisateur',
       totalUsers: 'Total utilisateurs',
       admins: 'Administrateurs',
       standardUsers: 'Utilisateurs standard',
@@ -605,6 +606,7 @@ export const translations = {
     users: {
       title: 'Users',
       subtitle: 'Manage users and their roles',
+      viewUser: 'View user',
       totalUsers: 'Total users',
       admins: 'Administrators',
       standardUsers: 'Standard users',

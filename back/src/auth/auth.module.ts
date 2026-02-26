@@ -36,11 +36,12 @@ import { MailService } from 'src/mail/mail.service';
       },
     }),
   ],
-  providers: [AuthService, LocalStrategy ,UsersService, MailService, {
-      provide: APP_GUARD,
-      useClass: AuthGuard,
-    }],
+  // {
+  //     provide: APP_GUARD,
+  //     useClass: AuthGuard,
+  //   }
+  providers: [AuthGuard, AuthService, LocalStrategy ,UsersService, MailService, ],
   controllers: [AuthController],
-  exports: [JwtModule],
+  exports: [JwtModule, AuthGuard],
 })
 export class AuthModule {}

@@ -7,6 +7,7 @@ import { UpdateUserDto } from './dtos/update-user.dto';
 import { UpdateProfileDto } from './dtos/update-profile.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { LocalAuthGuard } from 'src/auth/guards/local-auth.guard';
+import { Audit } from 'src/audit-log/decorators/audit.decorator';
 
 interface RequestWithUser extends Request {
   user: {
@@ -19,6 +20,7 @@ export class UsersController {
     constructor(private readonly usersService: UsersService) {}
 
 
+  @Audit('CREATE', 'User')
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
     const user = await this.usersService.create(createUserDto);
@@ -141,6 +143,7 @@ export class UsersController {
   }
 
   // 🔸 Supprimer un utilisateur
+  @Audit('DELETE', 'User')
   @Delete(':id')
   async remove(@Param('id') id: string) {
     const user = await this.usersService.findOne(+id);

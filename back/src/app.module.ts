@@ -18,6 +18,11 @@ import { VehiculeType } from './vehicule-types/entity/vehicule-type.entity';
 import { Vehicule } from './vehicules/entity/vehicule.entity';
 import { PasswordResetToken } from './auth/entity/password-reset-token.entity';
 import { MailModule } from './mail/mail.module';
+import { AuditLogModule } from './audit-log/audit-log.module';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core/constants';
+import { AuditLogInterceptor } from './audit-log/interceptors/audit-log.interceptor';
+import { AuthGuard } from './auth/guards/auth.guard';
+import { AuditLog } from './audit-log/entity/audit-log.entity';
 
 @Module({
   imports: [
@@ -32,12 +37,12 @@ import { MailModule } from './mail/mail.module';
         username: config.get<string>('DB_USERNAME', 'root'), 
         password: config.get<string>('DB_PASSWORD', ''), 
         database: config.get<string>('DB_DATABASE', ''),
-        entities: [User, Role, Permission, Customer, VehiculeType, Vehicule, PasswordResetToken],
+        entities: [User, Role, Permission, Customer, VehiculeType, Vehicule, PasswordResetToken, AuditLog],
         synchronize: true,
       }),
     }),
-    AuthModule, UsersModule, RolesModule, PermissionsModule, CustomersModule, VehiculeTypesModule, VehiculesModule, MailModule],
+    AuthModule, UsersModule, RolesModule, PermissionsModule, CustomersModule, VehiculeTypesModule, VehiculesModule, MailModule, AuditLogModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,  { provide: APP_INTERCEPTOR, useClass: AuditLogInterceptor }, { provide: APP_GUARD, useClass: AuthGuard,}],
 })
 export class AppModule {}
