@@ -25,9 +25,8 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
-  const [adminOpen, setAdminOpen] = useState(
-    location.pathname === '/users'
-  );
+  const [adminOpen, setAdminOpen] = useState(location.pathname === '/users' || location.pathname === '/roles' || location.pathname === '/permissions');
+  const [settingsOpen, setSettingsOpen] = useState(location.pathname === '/settings' || location.pathname === '/audit');
 
   const handleLogout = async () => {
     await logout();
@@ -37,8 +36,8 @@ export function AppSidebar() {
   const menuItems = [
     { title: t.nav.dashboard, url: '/', icon: LayoutDashboard, permission: 'dashboard.read' },
     { title: t.profile.title, url: '/profile', icon: UserCircle, permission: 'user.profile' },
+    { title: t.customer.title, url: '/customers', icon: UserCircle, permission: 'customer.read' },
     { title: t.nav.vehicles, url: '/vehicles', icon: Car, permission: 'vehicle.read' },
-    { title: t.nav.settings, url: '/settings', icon: Settings, permission: 'settings.read' },
   ];
 
   const adminSubItems = [
@@ -47,12 +46,21 @@ export function AppSidebar() {
     {title: t.permissions.title, url: '/permissions', icon: Lock, permission: 'permission.read' },
   ];
 
+  const settingSubItems = [
+    {title: t.audit.title, url: '/audit', icon: Shield, permission: 'audit.read' },
+    { title: t.nav.settings, url: '/settings', icon: Settings, permission: 'settings.read' },
+  ];
+
   const filteredMenuItems = menuItems.filter(item => {
     if (!item.permission) return true;
     return isAdmin || can(item.permission);
   });
 
   const filteredAdminSubItems = adminSubItems.filter(item =>
+    isAdmin || can(item.permission)
+  );
+
+  const filteredSettingSubItems = settingSubItems.filter(item =>
     isAdmin || can(item.permission)
   );
 
@@ -105,6 +113,40 @@ export function AppSidebar() {
                     <CollapsibleContent>
                       <SidebarMenu className="pl-4">
                         {filteredAdminSubItems.map((item) => (
+                          <SidebarMenuItem key={item.title}>
+                            <SidebarMenuButton
+                              asChild
+                              isActive={location.pathname === item.url}
+                              className="w-full"
+                            >
+                              <NavLink to={item.url} className="flex items-center gap-3 rounded-lg transition-colors">
+                                <item.icon className="w-5 h-5" />
+                                <span>{item.title}</span>
+                              </NavLink>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        ))}
+                      </SidebarMenu>
+                    </CollapsibleContent>
+                  </Collapsible>
+              </SidebarMenuItem>
+            </ProtectedAction>
+
+            <ProtectedAction permission={["audit.read", "settings.read"]} requiredAll={true}>
+              <SidebarMenuItem className="list-none">
+                  <Collapsible open={settingsOpen} onOpenChange={setSettingsOpen}>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton className="w-full justify-between">
+                        <div className="flex items-center gap-3">
+                          <Settings className="w-5 h-5" />
+                          <span>{t.settings.title}</span>
+                        </div>
+                        <ChevronDown className={`w-4 h-4 transition-transform ${settingsOpen ? 'rotate-180' : ''}`} />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenu className="pl-4">
+                        {filteredSettingSubItems.map((item) => (
                           <SidebarMenuItem key={item.title}>
                             <SidebarMenuButton
                               asChild

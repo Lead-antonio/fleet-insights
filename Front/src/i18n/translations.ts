@@ -1,4 +1,5 @@
 import { add } from "date-fns";
+import { title } from "process";
 
 export const translations = {
   fr: {
@@ -344,6 +345,15 @@ export const translations = {
       deleteName: 'Suppression',
       deleteDesc: 'Permet de supprimer les données du module',
     },
+    audit: {
+      title: 'Audit',
+      subtitle: 'Consulter les logs d\'audit du système', 
+    },
+    customer: {
+     title: 'Clients',
+     subtitle: 'Gérer vos clients',
+     name: 'Nom', 
+    }
   },
   en: {
     // Navigation
@@ -686,6 +696,15 @@ export const translations = {
       deleteName: 'Delete',
       deleteDesc: 'Allows deleting module data',
     },
+    audit: {
+      title: 'Audit',
+      subtitle: 'View system audit logs', 
+    },
+    customer: {
+     title: 'Customers',
+     subtitle: 'Manage your customers',
+     name: 'Name', 
+    }
   },
 };
 
