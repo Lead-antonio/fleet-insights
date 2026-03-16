@@ -1,3 +1,4 @@
+import VehiculeTypes from "@/pages/Vehicle-types";
 import { add } from "date-fns";
 import { title } from "process";
 
@@ -353,6 +354,25 @@ export const translations = {
      title: 'Clients',
      subtitle: 'Gérer vos clients',
      name: 'Nom', 
+    },
+    vehiculeTypes: {
+      manage: 'Gestion des catégories de véhicules',
+      title: "Type de véhicules",
+      stats: {
+        title: 'Statistiques',
+        total_types: "Total types",
+        total_vehicule: "Total véhicules",
+        moyenne_vehicule: "Moy.Véhicules / type",
+      },
+      search: "Rechercher par nom, description...",
+      tab: {
+        type: "Type",
+        description: "Description",
+        vehicule: "Nombre de véhicules"
+      },
+      boutton: {
+        add: "Nouveau type",
+      },
     }
   },
   en: {
@@ -704,7 +724,26 @@ export const translations = {
      title: 'Customers',
      subtitle: 'Manage your customers',
      name: 'Name', 
-    }
+    },
+    vehiculeTypes: {
+      manage: 'Vehicle Category Management',
+      title: 'Vehicle Type',
+      stats: {
+        title: 'Statistics',
+        total_types: 'Total Types',
+        total_vehicule: 'Total Vehicles',
+        moyenne_vehicule: 'Average Vehicles per Type',
+      },
+      search: "Search by name, description...",
+      tab: {
+        type: 'Type',
+        description: 'Description',
+        vehicle: 'Number of vehicles'
+      },
+      boutton: {
+        add: 'Add new',
+      },
+    } 
   },
 };
 

@@ -1,4 +1,4 @@
-import { LayoutDashboard, Car, Settings, LogOut, UserCircle, Users, ChevronDown, UserCog, Shield, Lock } from 'lucide-react';
+import { LayoutDashboard, Car, Settings, LogOut, UserCircle, Users, ChevronDown, UserCog, Shield, Lock, Truck, Layers } from 'lucide-react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
@@ -27,6 +27,7 @@ export function AppSidebar() {
   const { logout } = useAuth();
   const [adminOpen, setAdminOpen] = useState(location.pathname === '/users' || location.pathname === '/roles' || location.pathname === '/permissions');
   const [settingsOpen, setSettingsOpen] = useState(location.pathname === '/settings' || location.pathname === '/audit');
+  const [vehiculeOpen, setVehiculeOpen] = useState(location.pathname === '/vehicule-types' || location.pathname === '/vehicles');
 
   const handleLogout = async () => {
     await logout();
@@ -37,13 +38,17 @@ export function AppSidebar() {
     { title: t.nav.dashboard, url: '/', icon: LayoutDashboard, permission: 'dashboard.read' },
     { title: t.profile.title, url: '/profile', icon: UserCircle, permission: 'user.profile' },
     { title: t.customer.title, url: '/customers', icon: UserCircle, permission: 'customer.read' },
-    { title: t.nav.vehicles, url: '/vehicles', icon: Car, permission: 'vehicle.read' },
   ];
 
   const adminSubItems = [
     { title: t.users.title, url: '/users', icon: Users, permission: 'user.read' },
     {title: t.roles.title, url: '/roles', icon: Shield, permission: 'role.read' },
     {title: t.permissions.title, url: '/permissions', icon: Lock, permission: 'permission.read' },
+  ];
+
+  const vehiculeSubItems = [
+    {title: t.vehiculeTypes.title, url: '/vehicule-types', icon: Layers, permission: 'vehicule-type.read' },
+    { title: t.nav.vehicles, url: '/vehicles', icon: Truck, permission: 'vehicle.read' },
   ];
 
   const settingSubItems = [
@@ -63,6 +68,8 @@ export function AppSidebar() {
   const filteredSettingSubItems = settingSubItems.filter(item =>
     isAdmin || can(item.permission)
   );
+
+  const filteredVehiculeSubItems = vehiculeSubItems.filter(item => isAdmin || can(item.permission));
 
   return (
     <Sidebar className="border-r border-sidebar-border">
@@ -97,6 +104,40 @@ export function AppSidebar() {
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
+
+            <ProtectedAction permission={["vehicule.read", "vehicule-type.read"]} requiredAll={true}>
+              <SidebarMenuItem className="list-none">
+                  <Collapsible open={vehiculeOpen} onOpenChange={setVehiculeOpen}>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton className="w-full justify-between">
+                        <div className="flex items-center gap-3">
+                          <Car className="w-5 h-5" />
+                          <span>{t.nav.vehicles}</span>
+                        </div>
+                        <ChevronDown className={`w-4 h-4 transition-transform ${adminOpen ? 'rotate-180' : ''}`} />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenu className="pl-4">
+                        {filteredVehiculeSubItems.map((item) => (
+                          <SidebarMenuItem key={item.title}>
+                            <SidebarMenuButton
+                              asChild
+                              isActive={location.pathname === item.url}
+                              className="w-full"
+                            >
+                              <NavLink to={item.url} className="flex items-center gap-3 rounded-lg transition-colors">
+                                <item.icon className="w-5 h-5" />
+                                <span>{item.title}</span>
+                              </NavLink>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        ))}
+                      </SidebarMenu>
+                    </CollapsibleContent>
+                  </Collapsible>
+              </SidebarMenuItem>
+            </ProtectedAction>
 
             <ProtectedAction permission={["user.profile", "role.read", "permission.read"]} requiredAll={true}>
               <SidebarMenuItem className="list-none">

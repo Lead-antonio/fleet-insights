@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { CreateVehiculeDto } from './dto/create-vehicule.dto';
 import { UpdateVehiculeDto } from './dto/update-vehicule.dto';
 import { Repository } from 'typeorm/repository/Repository';
@@ -6,9 +6,13 @@ import { Vehicule } from './entity/vehicule.entity';
 import { InjectRepository } from '@nestjs/typeorm/dist/common/typeorm.decorators';
 import { Customer } from 'src/customers/entity/customer.entity';
 import { VehiculeType } from 'src/vehicule-types/entity/vehicule-type.entity';
+import { ConfigService } from '@nestjs/config';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class VehiculesService {
+  private readonly logger = new Logger(VehiculesService.name);
+
   constructor(
       @InjectRepository(Vehicule)
       private readonly vehiculeRepo: Repository<Vehicule>,
@@ -16,6 +20,7 @@ export class VehiculesService {
       private readonly customerRepo: Repository<Customer>,
       @InjectRepository(VehiculeType)
       private readonly typeRepo: Repository<VehiculeType>,
+      private readonly configService: ConfigService,
     ) {}
   
   async create(createVehiculeDto: CreateVehiculeDto) {
@@ -51,6 +56,20 @@ export class VehiculesService {
         );
     }
   }
+
+  private buildTrackingUrl(apiKey: string, command: string): string {
+    const url_geoloc_mtec = this.configService.get('geolocalisation.url');
+
+    const params = new URLSearchParams({
+      api: 'user',
+      key: apiKey,
+      cmd: command,
+    });
+
+    const url =  `${url_geoloc_mtec}?${params.toString()}`;
+    return url;
+  }
+
 
   findAll() {
     return `This action returns all vehicules`;

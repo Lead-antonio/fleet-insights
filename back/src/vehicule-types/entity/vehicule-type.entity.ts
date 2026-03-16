@@ -13,6 +13,9 @@ export class VehiculeType extends BaseEntity{
     @Column({ unique: true })
     label: string;
 
+    @Column({ nullable: true })
+    description: string;
+
     @OneToMany(() => Vehicule, vehicule => vehicule.type)
     vehicules: Vehicule[];
 }

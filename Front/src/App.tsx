@@ -23,6 +23,7 @@ import Permissions from "./pages/Permissions";
 import { ProtectedPage } from "./components/auth/ProtectedPage";
 import AuditLog from "./pages/AuditLog";
 import Customer from "./pages/Customer";
+import VehiculeTypes from "./pages/Vehicle-types";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,7 @@ const App = () => (
                     />
                     <Route path="/permissions" element={<Permissions />} />
                     <Route path="/profile" element={<Profile />} />
+                    <Route path="/vehicule-types" element={<VehiculeTypes />} />
                     <Route path="/customers" element={<Customer />} />
                     <Route path="/vehicles" element={<Vehicles />} />
                     <Route path="/settings" element={<Settings />} />

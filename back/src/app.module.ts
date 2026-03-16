@@ -23,6 +23,7 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core/constants';
 import { AuditLogInterceptor } from './audit-log/interceptors/audit-log.interceptor';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { AuditLog } from './audit-log/entity/audit-log.entity';
+import { GpsModule } from './gps/gps.module';
 
 @Module({
   imports: [
@@ -41,7 +42,7 @@ import { AuditLog } from './audit-log/entity/audit-log.entity';
         synchronize: true,
       }),
     }),
-    AuthModule, UsersModule, RolesModule, PermissionsModule, CustomersModule, VehiculeTypesModule, VehiculesModule, MailModule, AuditLogModule],
+    AuthModule, UsersModule, RolesModule, PermissionsModule, CustomersModule, VehiculeTypesModule, VehiculesModule, MailModule, AuditLogModule, GpsModule],
   controllers: [AppController],
   providers: [AppService,  { provide: APP_INTERCEPTOR, useClass: AuditLogInterceptor }, { provide: APP_GUARD, useClass: AuthGuard,}],
 })
