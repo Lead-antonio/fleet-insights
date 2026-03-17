@@ -1,4 +1,4 @@
-import { LayoutDashboard, Car, Settings, LogOut, UserCircle, Users, ChevronDown, UserCog, Shield, Lock, Truck, Layers } from 'lucide-react';
+import { LayoutDashboard, Car, Settings, LogOut, UserCircle, Users, ChevronDown, UserCog, Shield, Lock, Truck, Layers, Map } from 'lucide-react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {

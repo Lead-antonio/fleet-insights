@@ -13,46 +13,35 @@ export class CreateVehiculeDto {
   @IsString()
   matricule: string;
 
-  @IsString()
   @IsOptional()
-  imei: string;
+  imei?: string;
 
   @IsOptional()
-  @IsString()
   photo_url?: string;
 
   @IsOptional()
-  @IsString()
   brand?: string;
 
   @IsOptional()
-  @IsString()
   model?: string;
 
   @IsOptional()
-  @IsInt()
-  @Type(() => Number)
   year?: number;
 
   @IsOptional()
   @IsEnum(FuelType)
   fuel_type?: FuelType;
 
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @IsPositive()
-  @Type(() => Number)
-  tank_capacity: number;
+  @IsOptional()
+  tank_capacity?: number;
 
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @IsPositive()
-  @Type(() => Number)
-  odometer: number;
+  @IsOptional()
+  odometer?: number;
 
   @IsInt()
-  @Type(() => Number)
   customerId: number;
 
+  @IsOptional()
   @IsInt()
-  @Type(() => Number)
-  typeId: number;
+  typeId?: number;
 }

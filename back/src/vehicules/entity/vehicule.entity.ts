@@ -39,6 +39,7 @@ export class Vehicule extends BaseEntity {
         type: 'decimal',
         precision: 10,
         scale: 2,
+        nullable: true
     })
     tank_capacity: Decimal128;
 
@@ -46,12 +47,13 @@ export class Vehicule extends BaseEntity {
         type: 'decimal',
         precision: 10,
         scale: 2,
+        nullable: true
     })
     odometer: Decimal128;
 
     @ManyToOne(() => Customer, customer => customer.vehicules, { eager: true })
     customer: Customer;
 
-    @ManyToOne(() => VehiculeType, type => type.vehicules, { eager: true })
+    @ManyToOne(() => VehiculeType, type => type.vehicules, { eager: true, nullable: true })
     type: VehiculeType;
 }

@@ -24,6 +24,7 @@ import { ProtectedPage } from "./components/auth/ProtectedPage";
 import AuditLog from "./pages/AuditLog";
 import Customer from "./pages/Customer";
 import VehiculeTypes from "./pages/Vehicle-types";
+import LiveTracking from "./pages/Livetracking";
 
 const queryClient = new QueryClient();
 
