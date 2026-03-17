@@ -31,15 +31,11 @@ import { MailService } from 'src/mail/mail.service';
         const secret = config.get<string>('JWT_SECRET') ?? 'default_secret';
         return {
           secret,
-          signOptions: { expiresIn: '15m' },
+          signOptions: { expiresIn: '1h' },
         };
       },
     }),
   ],
-  // {
-  //     provide: APP_GUARD,
-  //     useClass: AuthGuard,
-  //   }
   providers: [AuthGuard, AuthService, LocalStrategy ,UsersService, MailService, ],
   controllers: [AuthController],
   exports: [JwtModule, AuthGuard],

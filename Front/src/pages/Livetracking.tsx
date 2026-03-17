@@ -65,16 +65,6 @@ const STATUS_COLORS: Record<VehicleStatus, string> = {
   moving: "#22c55e", idle: "#f59e0b", stopped: "#3b82f6", offline: "#ef4444",
 };
 
-const getGpsVehicleIcon = (model: string, name: string): React.ElementType => {
-  const s = (model + " " + name).toLowerCase();
-  if (s.includes("moto") || s.includes("yamaha") || s.includes("tvs") || s.includes("kymco") ||
-      s.includes("hero") || s.includes("boxer") || s.includes("dakar") || s.includes("kenbo")) return Bike;
-  if (s.includes("camion") || s.includes("sprinter") || s.includes("eicher") || s.includes("foton") ||
-      s.includes("fourgon") || s.includes("mudan") || s.includes("super carry")) return Truck;
-  if (s.includes("groupe") || s.includes("aksa") || s.includes("caterpillar") || s.includes("olympian")) return Zap;
-  return Car;
-};
-
 const formatLastSeen = (dtStr: string): string => {
   if (!dtStr || dtStr === "0000-00-00 00:00:00") return "—";
   const diff = Date.now() - new Date(dtStr).getTime();
@@ -94,6 +84,101 @@ function InfoBox({ label, children, className = "" }: { label: string; children:
     </div>
   );
 }
+
+
+// ─── SVG icons par type de véhicule (inline dans divIcon Leaflet) ─────────────
+type VehicleIconType = "car" | "moto" | "truck" | "sprinter" | "engin";
+
+const getVehicleIconType = (model: string, name: string): VehicleIconType => {
+  const s = (model + " " + name).toLowerCase();
+  if (s.includes("moto") || s.includes("yamaha") || s.includes("tvs")   ||
+      s.includes("kymco") || s.includes("hero")  || s.includes("boxer") ||
+      s.includes("dakar") || s.includes("kenbo")) return "moto";
+  if (s.includes("sprinter")) return "sprinter";
+  if (s.includes("camion") || s.includes("eicher") || s.includes("foton") ||
+      s.includes("mudan") || s.includes("super carry")) return "truck";
+  if (s.includes("groupe") || s.includes("aksa") || s.includes("caterpillar") ||
+      s.includes("olympian") || s.includes("engin")) return "engin";
+  return "car";
+};
+
+// SVGs dessinés à 20×20, centrés dans le marker
+const VEHICLE_SVG: Record<VehicleIconType, string> = {
+  // Voiture — vue de dessus
+  car: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20" fill="COLOR">
+    <path d="M14.5 7.5 13 4H7L5.5 7.5H3l-.5 1v5l1 .5v1h2v-1h9v1h2v-1l1-.5v-5l-.5-1h-2.5z
+             M7.5 5.5h5l1 2h-7l1-2z
+             M5.5 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0z
+             M12.5 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0z"/>
+  </svg>`,
+
+  // Moto — vue de côté simplifiée
+  moto: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20" fill="COLOR">
+    <circle cx="4.5" cy="13" r="2.5" stroke="COLOR" stroke-width="1.2" fill="none"/>
+    <circle cx="15.5" cy="13" r="2.5" stroke="COLOR" stroke-width="1.2" fill="none"/>
+    <path d="M4.5 13 7 8h4l2 2h2.5M11 8l1.5-2.5H15" stroke="COLOR" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+    <circle cx="10" cy="9" r="1" fill="COLOR"/>
+  </svg>`,
+
+  // Camion — vue de côté
+  truck: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20" fill="COLOR">
+    <rect x="1" y="7" width="11" height="7" rx="1"/>
+    <path d="M12 9h4l2 2v3h-6V9z"/>
+    <circle cx="4" cy="15.5" r="1.5" fill="white" stroke="COLOR" stroke-width="1"/>
+    <circle cx="9" cy="15.5" r="1.5" fill="white" stroke="COLOR" stroke-width="1"/>
+    <circle cx="15.5" cy="15.5" r="1.5" fill="white" stroke="COLOR" stroke-width="1"/>
+  </svg>`,
+
+  // Sprinter / fourgon
+  sprinter: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20" fill="COLOR">
+    <rect x="1" y="6" width="14" height="8" rx="1.5"/>
+    <path d="M15 9h2.5l1.5 2v3h-4V9z"/>
+    <rect x="2" y="7.5" width="5" height="3" rx="0.5" fill="white" opacity="0.6"/>
+    <circle cx="4"  cy="15" r="1.5" fill="white" stroke="COLOR" stroke-width="1"/>
+    <circle cx="13" cy="15" r="1.5" fill="white" stroke="COLOR" stroke-width="1"/>
+    <circle cx="17" cy="15" r="1.5" fill="white" stroke="COLOR" stroke-width="1"/>
+  </svg>`,
+
+  // Engin / groupe électrogène
+  engin: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20" fill="COLOR">
+    <rect x="2" y="6" width="16" height="9" rx="1.5"/>
+    <rect x="4" y="8" width="4" height="5" rx="0.5" fill="white" opacity="0.5"/>
+    <path d="M10 8.5h5M10 10.5h5M10 12.5h3" stroke="white" stroke-width="1" stroke-linecap="round" opacity="0.7"/>
+    <path d="M9 4.5 7 6h6l-2-1.5H9z"/>
+    <rect x="7" y="15" width="6" height="1.5" rx="0.5"/>
+  </svg>`,
+};
+
+// Mapping VehicleIconType → composant Lucide (utilisé dans la liste latérale et le panneau détail)
+const VEHICLE_LUCIDE_ICON: Record<VehicleIconType, React.ElementType> = {
+  car:      Car,
+  moto:     Bike,
+  truck:    Truck,
+  sprinter: Truck,
+  engin:    Zap,
+};
+
+const getGpsVehicleIcon = (model: string, name: string): React.ElementType =>
+  VEHICLE_LUCIDE_ICON[getVehicleIconType(model, name)];
+
+const buildVehicleIcon = (obj: GpsObject, color: string, isMoving: boolean): L.DivIcon => {
+  const type = getVehicleIconType(obj.model, obj.name);
+  const svg = VEHICLE_SVG[type].split("COLOR").join(color);
+
+  return L.divIcon({
+    html: `<div style="
+        width:40px;height:40px;border-radius:50%;
+        background:${color}22;
+        border:2px solid ${color};
+        display:flex;align-items:center;justify-content:center;
+        box-shadow:0 0 0 ${isMoving ? "6px" : "0px"} ${color}33;
+        transition:box-shadow 0.3s;
+      ">${svg}</div>`,
+    className: "",
+    iconSize: [40, 40],
+    iconAnchor: [20, 20],
+  });
+};
 
 // ─── Map Component (isolated to avoid re-init issues) ─────────────────────────
 function LeafletMap({
@@ -178,22 +263,7 @@ function LeafletMap({
       const color = STATUS_COLORS[status];
       const isMoving = status === "moving";
 
-      const icon = L.divIcon({
-        html: `
-          <div style="
-            width:36px;height:36px;border-radius:50%;
-            background:${color}22;
-            border:2px solid ${color};
-            display:flex;align-items:center;justify-content:center;
-            box-shadow: 0 0 0 ${isMoving ? "6px" : "0px"} ${color}22;
-            transition: box-shadow 0.3s;
-          ">
-            <div style="width:12px;height:12px;border-radius:50%;background:${color};"></div>
-          </div>`,
-        className: "",
-        iconSize: [36, 36],
-        iconAnchor: [18, 18],
-      });
+      const icon = buildVehicleIcon(obj, color, isMoving);
 
       const marker = L.marker([lat, lng], { icon }).addTo(map);
       marker.bindPopup(`
