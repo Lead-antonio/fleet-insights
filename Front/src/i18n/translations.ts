@@ -373,6 +373,54 @@ export const translations = {
       boutton: {
         add: "Nouveau type",
       },
+    },
+    vehicule: {
+      manage: 'Gestion de la flotte de véhicules',
+      title: "Véhicules",
+      stats: {
+        title: 'Statistiques',
+        total_vehicule: "Total véhicules",
+        total_essence: "Essence",
+        total_gasoil: "Gasoil",
+        total_electrique: "Electrique",
+      },
+      search: "Rechercher par matricule, marque, modèle, client...",
+      select_type: "Tous les types",
+      select_fuel: "Tous les carburants",
+      tab: {
+        type: "Type",
+        description: "Description",
+        vehicule: "Véhicule",
+        client: "Client",
+        carburant: "Carburant",
+        kilométrage: "Kilométrage",
+      },
+      boutton: {
+        liste: "Liste",
+        live_tracking: "Live Tracking",
+        sync_vehicule: "Sync GPS",
+        add: "Nouveau",
+      },
+      pagination: {
+        title: "véhicule(s)",
+        previous: "Précédent",
+        next: "Suivant",
+        first: "Premier",
+        last: "Dernier",
+        page: "Page",
+        of: "sur",
+        rows_per_page: "Lignes par page",
+        showing: "Affichage",
+      },
+      live_tracking: {
+        error_api: "Impossible de contacter l'API GPS. Vérifiez la clé API",
+        title: "Suivi en temps réel de la flotte",
+        refresh: "Actualiser",
+        live: "Live",
+        select_customer: "Veuillez sélectionner un client",
+        no_result: "Aucun client sélectionné",
+        no_result_info: "Sélectionnez un client pour afficher son suivi en temps rée"
+      }
     }
   },
   en: {
@@ -743,7 +791,55 @@ export const translations = {
       boutton: {
         add: 'Add new',
       },
-    } 
+    },
+    vehicule: {
+      manage: 'Vehicle fleet management',
+      title: "Vehicles",
+      stats: {
+        title: 'Statistics',
+        total_vehicule: "Total vehicles",
+        total_essence: "Petrol",
+        total_gasoil: "Diesel",
+        total_electrique: "Electric",
+      },
+      search: "Search by plate number, brand, model, client...",
+      select_type: "All types",
+      select_fuel: "All fuels",
+      tab: {
+        type: "Type",
+        description: "Description",
+        vehicule: "Vehicle",
+        client: "Client",
+        carburant: "Fuel",
+        kilométrage: "Mileage",
+      },
+      boutton: {
+        liste: "List",
+        live_tracking: "Live Tracking",
+        sync_vehicule: "Sync GPS",
+        add: "New",
+      },
+      pagination: {
+        title: "vehicle(s)",
+        previous: "Previous",
+        next: "Next",
+        first: "First",
+        last: "Last",
+        page: "Page",
+        of: "of",
+        rows_per_page: "Rows per page",
+        showing: "Showing",
+      },
+      live_tracking: {
+        error_api: "Unable to contact the GPS API. Please check the API key",
+        title: "Real-time fleet tracking",
+        live: "Live",
+        refresh: "Refresh",
+        select_customer: "Please select a client",
+        no_result: "No client selected",
+        no_result_info: "Select a client to display real-time tracking",
+      }
+    }
   },
 };
 

@@ -1,11 +1,16 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   Radio, RefreshCw, Clock, AlertTriangle, Loader2,
   Gauge, Battery, Wifi, WifiOff, X, Car, Bike, Truck, Zap,
+  Square,
+  Navigation,
+  ChevronDown,
 } from "lucide-react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import api from "@/lib/api";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Card, CardContent } from "@/components/ui/card";
 
 // Fix Leaflet default marker icons (broken with Vite)
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -54,27 +59,76 @@ const getGpsStatus = (obj: GpsObject): VehicleStatus => {
   return "stopped";
 };
 
-const STATUS_CFG: Record<VehicleStatus, { label: string; color: string; bg: string; dot: string }> = {
-  moving:  { label: "En mouvement", color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20", dot: "bg-emerald-400" },
-  idle:    { label: "En ligne",     color: "text-amber-600 dark:text-amber-400",     bg: "bg-amber-500/10 border-amber-500/20",   dot: "bg-amber-400" },
-  stopped: { label: "Arrêté",       color: "text-sky-600 dark:text-sky-400",         bg: "bg-sky-500/10 border-sky-500/20",       dot: "bg-sky-400" },
-  offline: { label: "Hors ligne",   color: "text-rose-500",                          bg: "bg-rose-500/10 border-rose-500/20",     dot: "bg-rose-400" },
+const STATUS_CFG: Record<
+  VehicleStatus,
+  { label: string; color: string; bg: string; dot: string }
+> = {
+  idle: {
+    label: "En ligne",
+    color: "text-emerald-600 dark:text-emerald-400",
+    bg: "bg-emerald-500/10 border-emerald-500/20",
+    dot: "bg-emerald-400",
+  },
+  moving: {
+    label: "En mouvement",
+    color: "text-sky-600 dark:text-sky-400",
+    bg: "bg-sky-500/10 border-sky-500/20",
+    dot: "bg-sky-400",
+  },
+  stopped: {
+    label: "Arrêté",
+    color: "text-rose-600 dark:text-rose-400",
+    bg: "bg-rose-500/10 border-rose-500/20",
+    dot: "bg-rose-400",
+  },
+  offline: {
+    label: "Hors ligne",
+    color: "text-amber-600 dark:text-amber-400",
+    bg: "bg-amber-500/10 border-amber-500/20",
+    dot: "bg-amber-400",
+  },
 };
 
 const STATUS_COLORS: Record<VehicleStatus, string> = {
-  moving: "#22c55e", idle: "#f59e0b", stopped: "#3b82f6", offline: "#ef4444",
+  idle: "#22c55e",     // vert
+  moving: "#3b82f6",   // bleu
+  stopped: "#ef4444",  // rouge
+  offline: "#f59e0b", 
 };
 
-const formatLastSeen = (dtStr: string): string => {
+// const formatLastSeen = (dtStr: string): string => {
+//   if (!dtStr || dtStr === "0000-00-00 00:00:00") return "—";
+//   const diff = Date.now() - new Date(dtStr).getTime();
+//   const m = Math.floor(diff / 60000);
+//   if (m < 1) return "À l'instant";
+//   if (m < 60) return `Il y a ${m}m`;
+//   const h = Math.floor(m / 60);
+//   if (h < 24) return `Il y a ${h}h`;
+//   return `Il y a ${Math.floor(h / 24)}j`;
+// };
+
+const formatLastSeen = (dtStr: string, lang: "fr" | "en" = "fr"): string => {
   if (!dtStr || dtStr === "0000-00-00 00:00:00") return "—";
+
   const diff = Date.now() - new Date(dtStr).getTime();
   const m = Math.floor(diff / 60000);
-  if (m < 1) return "À l'instant";
-  if (m < 60) return `Il y a ${m}m`;
   const h = Math.floor(m / 60);
-  if (h < 24) return `Il y a ${h}h`;
-  return `Il y a ${Math.floor(h / 24)}j`;
+  const d = Math.floor(h / 24);
+
+  if (lang === "fr") {
+    if (m < 1) return "À l'instant";
+    if (m < 60) return `Il y a ${m}m`;
+    if (h < 24) return `Il y a ${h}h`;
+    return `Il y a ${d}j`;
+  } else {
+    if (m < 1) return "Just now";
+    if (m < 60) return `${m}m ago`;
+    if (h < 24) return `${h}h ago`;
+    return `${d}d ago`;
+  }
 };
+
+
 
 function InfoBox({ label, children, className = "" }: { label: string; children: React.ReactNode; className?: string }) {
   return (
@@ -102,50 +156,41 @@ const getVehicleIconType = (model: string, name: string): VehicleIconType => {
   return "car";
 };
 
-// SVGs dessinés à 20×20, centrés dans le marker
+
 const VEHICLE_SVG: Record<VehicleIconType, string> = {
-  // Voiture — vue de dessus
-  car: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20" fill="COLOR">
-    <path d="M14.5 7.5 13 4H7L5.5 7.5H3l-.5 1v5l1 .5v1h2v-1h9v1h2v-1l1-.5v-5l-.5-1h-2.5z
-             M7.5 5.5h5l1 2h-7l1-2z
-             M5.5 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0z
-             M12.5 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0z"/>
+  car: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2">
+        <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C1.4 11.3 1 12.1 1 13v3c0 .6.4 1 1 1h2"/>
+        <circle cx="7" cy="17" r="2"/>
+        <circle cx="17" cy="17" r="2"/>
+      </svg>`,
+
+  moto: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round">
+    <circle cx="6" cy="16" r="3"/>
+    <circle cx="18" cy="16" r="3"/>
+    <path d="M9 16L11 9h3l3 4" fill="none"/>
+    <path d="M11 9l2-3h2"/>
   </svg>`,
 
-  // Moto — vue de côté simplifiée
-  moto: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20" fill="COLOR">
-    <circle cx="4.5" cy="13" r="2.5" stroke="COLOR" stroke-width="1.2" fill="none"/>
-    <circle cx="15.5" cy="13" r="2.5" stroke="COLOR" stroke-width="1.2" fill="none"/>
-    <path d="M4.5 13 7 8h4l2 2h2.5M11 8l1.5-2.5H15" stroke="COLOR" stroke-width="1.3" fill="none" stroke-linecap="round"/>
-    <circle cx="10" cy="9" r="1" fill="COLOR"/>
+  truck: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="white">
+    <rect x="2" y="8" width="13" height="7" rx="1"/>
+    <path d="M15 11h4l2 2v3h-6v-5z"/>
+    <circle cx="6" cy="17" r="2"/>
+    <circle cx="18" cy="17" r="2"/>
   </svg>`,
 
-  // Camion — vue de côté
-  truck: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20" fill="COLOR">
-    <rect x="1" y="7" width="11" height="7" rx="1"/>
-    <path d="M12 9h4l2 2v3h-6V9z"/>
-    <circle cx="4" cy="15.5" r="1.5" fill="white" stroke="COLOR" stroke-width="1"/>
-    <circle cx="9" cy="15.5" r="1.5" fill="white" stroke="COLOR" stroke-width="1"/>
-    <circle cx="15.5" cy="15.5" r="1.5" fill="white" stroke="COLOR" stroke-width="1"/>
+  sprinter: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="white">
+    <path d="M3 10l2-4h11l2 4v5H3v-5z"/>
+    <rect x="14" y="10" width="5" height="5" rx="1"/>
+    <circle cx="6.5" cy="17" r="2"/>
+    <circle cx="17.5" cy="17" r="2"/>
   </svg>`,
 
-  // Sprinter / fourgon
-  sprinter: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20" fill="COLOR">
-    <rect x="1" y="6" width="14" height="8" rx="1.5"/>
-    <path d="M15 9h2.5l1.5 2v3h-4V9z"/>
-    <rect x="2" y="7.5" width="5" height="3" rx="0.5" fill="white" opacity="0.6"/>
-    <circle cx="4"  cy="15" r="1.5" fill="white" stroke="COLOR" stroke-width="1"/>
-    <circle cx="13" cy="15" r="1.5" fill="white" stroke="COLOR" stroke-width="1"/>
-    <circle cx="17" cy="15" r="1.5" fill="white" stroke="COLOR" stroke-width="1"/>
-  </svg>`,
-
-  // Engin / groupe électrogène
-  engin: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20" fill="COLOR">
-    <rect x="2" y="6" width="16" height="9" rx="1.5"/>
-    <rect x="4" y="8" width="4" height="5" rx="0.5" fill="white" opacity="0.5"/>
-    <path d="M10 8.5h5M10 10.5h5M10 12.5h3" stroke="white" stroke-width="1" stroke-linecap="round" opacity="0.7"/>
-    <path d="M9 4.5 7 6h6l-2-1.5H9z"/>
-    <rect x="7" y="15" width="6" height="1.5" rx="0.5"/>
+  engin: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="white" stroke="white" stroke-width="1.5">
+    <rect x="4" y="7" width="12" height="8" rx="1" fill="white"/>
+    <rect x="16" y="9" width="4" height="4" rx="1"/>
+    <rect x="2" y="13" width="20" height="3" rx="1"/>
+    <circle cx="6" cy="17" r="2"/>
+    <circle cx="18" cy="17" r="2"/>
   </svg>`,
 };
 
@@ -166,17 +211,10 @@ const buildVehicleIcon = (obj: GpsObject, color: string, isMoving: boolean): L.D
   const svg = VEHICLE_SVG[type].split("COLOR").join(color);
 
   return L.divIcon({
-    html: `<div style="
-        width:40px;height:40px;border-radius:50%;
-        background:${color}22;
-        border:2px solid ${color};
-        display:flex;align-items:center;justify-content:center;
-        box-shadow:0 0 0 ${isMoving ? "6px" : "0px"} ${color}33;
-        transition:box-shadow 0.3s;
-      ">${svg}</div>`,
-    className: "",
-    iconSize: [40, 40],
-    iconAnchor: [20, 20],
+    className: 'custom-marker',
+    html: `<div class="vehicle-marker ${color}" style=" background:${color};">${svg}</div>`,
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
   });
 };
 
@@ -319,6 +357,7 @@ interface LiveTrackingProps {
 }
 
 export default function LiveTracking({ customers }: LiveTrackingProps) {
+  const { t, language } = useLanguage();
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [gpsData, setGpsData] = useState<GpsObject[]>([]);
   const [loading, setLoading] = useState(false);
@@ -339,7 +378,7 @@ export default function LiveTracking({ customers }: LiveTrackingProps) {
       setGpsData(data);
       setLastRefresh(new Date());
     } catch {
-      setError("Impossible de contacter l'API GPS. Vérifiez la clé API.");
+      setError(t.vehicule.live_tracking.error_api);
     } finally {
       setLoading(false);
     }
@@ -368,37 +407,47 @@ export default function LiveTracking({ customers }: LiveTrackingProps) {
     offline: gpsData.filter((o) => getGpsStatus(o) === "offline").length,
   };
 
+  const LivekpiCards = [
+    { label: t.fleet.online, value: counts.idle, icon: Wifi, color: 'bg-success' },
+    { label: t.fleet.offline, value: counts.offline, icon: WifiOff, color: 'bg-destructive' },
+    { label: t.fleet.moving, value: counts.moving, icon: Navigation, color: 'bg-info' },
+    { label: t.fleet.stopped, value: counts.stopped, icon: Square, color: 'bg-warning' },
+  ];
+
   return (
     <div className="space-y-4 animate-fade-in">
 
-      {/* ── Header ── */}
-      <div className="flex items-start justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            Live Tracking
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
-          </h1>
-          <p className="text-muted-foreground">Suivi en temps réel de la flotte</p>
-        </div>
-      </div>
-
       {/* ── Controls bar ── */}
-      <div className="rounded-lg border bg-card p-4 flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2 flex-1 min-w-48">
-          <Radio className="w-4 h-4 text-primary flex-shrink-0" />
+      <div className="bg-background border border-border/50 rounded-xl px-5 py-3 flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+            {t.vehicule.live_tracking.title}
+          </span>
+          <span className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-0.5 text-[11px] font-medium text-emerald-600">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            {t.vehicule.live_tracking.live}
+          </span>
+        </div>
+
+        {/* Sélecteur client */}
+        <div className="relative flex-1 min-w-[180px] max-w-xs">
           <select
             value={selectedCustomer?.id ?? ""}
             onChange={(e) => {
               const c = customers.find((c) => c.id === parseInt(e.target.value));
               if (c) handleSelectCustomer(c);
             }}
-            className="h-9 flex-1 rounded-md border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full h-9 pl-3 pr-8 rounded-lg border border-border/70 bg-muted/40
+                      text-sm font-medium text-foreground appearance-none cursor-pointer
+                      focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40
+                      transition-colors"
           >
-            <option value="">-- Sélectionner un client --</option>
+            <option value="">{t.vehicule.live_tracking.select_customer}</option>
             {customersWithKey.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
+          <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
         </div>
 
         {selectedCustomer && (
@@ -409,7 +458,7 @@ export default function LiveTracking({ customers }: LiveTrackingProps) {
               className="h-9 px-3 rounded-md border bg-background hover:bg-muted text-sm flex items-center gap-2 transition-colors disabled:opacity-50"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-              Actualiser
+              {t.vehicule.live_tracking.refresh}
             </button>
             <button
               onClick={() => setAutoRefresh((p) => !p)}
@@ -452,14 +501,21 @@ export default function LiveTracking({ customers }: LiveTrackingProps) {
       {gpsData.length > 0 && (
         <>
           {/* Stats */}
-          <div className="grid grid-cols-4 gap-3">
-            {(["moving", "idle", "stopped", "offline"] as VehicleStatus[]).map((s) => (
-              <div key={s} className={`rounded-lg border ${STATUS_CFG[s].bg} p-3 flex items-center gap-3`}>
-                <div>
-                  <p className={`text-2xl font-bold ${STATUS_CFG[s].color}`}>{counts[s]}</p>
-                  <p className="text-xs text-muted-foreground">{STATUS_CFG[s].label}</p>
-                </div>
-              </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {LivekpiCards.map((kpi) => (
+              <Card key={kpi.label} className="overflow-hidden">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">{kpi.label}</p>
+                      <p className="text-3xl font-bold">{kpi.value}</p>
+                    </div>
+                    <div className={`w-12 h-12 rounded-full ${kpi.color} flex items-center justify-center`}>
+                      <kpi.icon className="w-6 h-6 text-white" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
 
@@ -484,7 +540,7 @@ export default function LiveTracking({ customers }: LiveTrackingProps) {
             {/* Vehicle list */}
             <div className="col-span-4 rounded-lg border bg-card flex flex-col overflow-hidden" style={{ height: 520 }}>
               <div className="px-4 py-3 border-b bg-muted/30 flex-shrink-0">
-                <p className="text-sm font-semibold">{gpsData.length} véhicule(s)</p>
+                <p className="text-sm font-semibold">{gpsData.length} {t.vehicule.pagination.title}</p>
               </div>
               <div className="flex-1 overflow-y-auto divide-y">
                 {gpsData.map((obj) => {
@@ -517,10 +573,10 @@ export default function LiveTracking({ customers }: LiveTrackingProps) {
                         <span className="text-xs flex items-center gap-0.5 text-muted-foreground">
                           <Gauge className="w-3 h-3" /> {speed}km/h
                         </span>
-                        <span className={`text-xs flex items-center gap-0.5 ${battery < 30 ? "text-rose-500" : "text-muted-foreground"}`}>
+                        {/* <span className={`text-xs flex items-center gap-0.5 ${battery < 30 ? "text-rose-500" : "text-muted-foreground"}`}>
                           <Battery className="w-3 h-3" /> {battery}%
-                        </span>
-                        <span className="text-xs text-muted-foreground">{formatLastSeen(obj.dt_server)}</span>
+                        </span> */}
+                        <span className="text-xs text-muted-foreground">{formatLastSeen(obj.dt_server, language)}</span>
                       </div>
                     </div>
                   );
@@ -567,7 +623,7 @@ export default function LiveTracking({ customers }: LiveTrackingProps) {
                   </InfoBox>
                   <InfoBox label="GPS">{selectedVehicle.params?.gpslev ?? "—"}/15</InfoBox>
                   <InfoBox label="GSM">{selectedVehicle.params?.gsmlev ?? "—"}/4</InfoBox>
-                  <InfoBox label="Dernier signal">{formatLastSeen(selectedVehicle.dt_server)}</InfoBox>
+                  <InfoBox label="Dernier signal">{formatLastSeen(selectedVehicle.dt_server, language)}</InfoBox>
                 </div>
 
                 {selectedVehicle.custom_fields?.length > 0 && (
@@ -593,8 +649,8 @@ export default function LiveTracking({ customers }: LiveTrackingProps) {
             <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-400/30 border border-emerald-400 animate-pulse" />
           </div>
           <div className="text-center">
-            <p className="text-sm font-medium text-foreground/60">Aucun client sélectionné</p>
-            <p className="text-xs mt-1">Sélectionnez un client pour afficher son suivi en temps réel</p>
+            <p className="text-sm font-medium text-foreground/60">{t.vehicule.live_tracking.no_result}</p>
+            <p className="text-xs mt-1">{t.vehicule.live_tracking.no_result_info}</p>
           </div>
         </div>
       )}
