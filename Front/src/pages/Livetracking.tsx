@@ -5,6 +5,7 @@ import {
   Square,
   Navigation,
   ChevronDown,
+  MapPin,
 } from "lucide-react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -356,6 +357,57 @@ interface LiveTrackingProps {
   customers: Customer[];
 }
 
+// Hook reverse geocoding
+function useReverseGeocode(lat?: string | number, lng?: string | number) {
+  const [location, setLocation] = useState<{
+    display: string;
+    road: string;
+    city: string;
+    raw: string;
+  } | null>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
+
+  useEffect(() => {
+    // Guard : si pas de coords, reset et sortie
+    if (!lat || !lng) {
+      setLocation(null);
+      return;
+    }
+
+    const controller = new AbortController();
+    setLocationLoading(true);
+
+    fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=fr`,
+      {
+        signal: controller.signal,
+        headers: { "User-Agent": "VehicleTracker/1.0" },
+      }
+    )
+      .then((r) => r.json())
+      .then((data) => {
+        const a = data.address ?? {};
+        const road = a.road ?? a.highway ?? a.path ?? a.footway ?? "Route inconnue";
+        const ref = a.ref;
+        const roadLabel = ref ? `${ref} — ${road}` : road;
+        const city = a.city ?? a.town ?? a.village ?? a.county ?? a.state ?? "";
+
+        setLocation({
+          display: data.display_name?.split(",").slice(0, 2).join(", ") ?? "",
+          road: roadLabel,
+          city: `${city}${a.country ? `, ${a.country}` : ""}`,
+          raw: `${parseFloat(String(lat)).toFixed(4)}, ${parseFloat(String(lng)).toFixed(4)}`,
+        });
+      })
+      .catch(() => setLocation(null))
+      .finally(() => setLocationLoading(false));
+
+    return () => controller.abort();
+  }, [lat, lng]);
+
+  return { location, locationLoading };
+}
+
 export default function LiveTracking({ customers }: LiveTrackingProps) {
   const { t, language } = useLanguage();
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -366,6 +418,11 @@ export default function LiveTracking({ customers }: LiveTrackingProps) {
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+   const { location, locationLoading  } = useReverseGeocode(
+      selectedVehicle?.lat,
+      selectedVehicle?.lng
+    );
 
   const customersWithKey = customers.filter((c) => c.api_key);
 
@@ -409,10 +466,12 @@ export default function LiveTracking({ customers }: LiveTrackingProps) {
 
   const LivekpiCards = [
     { label: t.fleet.online, value: counts.idle, icon: Wifi, color: 'bg-success' },
-    { label: t.fleet.offline, value: counts.offline, icon: WifiOff, color: 'bg-destructive' },
+    { label: t.fleet.offline, value: counts.offline, icon: WifiOff, color: 'bg-warning' },
     { label: t.fleet.moving, value: counts.moving, icon: Navigation, color: 'bg-info' },
-    { label: t.fleet.stopped, value: counts.stopped, icon: Square, color: 'bg-warning' },
+    { label: t.fleet.stopped, value: counts.stopped, icon: Square, color: 'bg-destructive' },
   ];
+
+
 
   return (
     <div className="space-y-4 animate-fade-in">
@@ -524,11 +583,11 @@ export default function LiveTracking({ customers }: LiveTrackingProps) {
               ne reçoivent pas la hauteur du parent dans un grid CSS */}
           <div
             className="grid grid-cols-12 gap-4"
-            style={{ height: 520, gridTemplateRows: "520px" }}
+            style={{ height: 520, gridTemplateRows: "700px" }}
           >
             {/* wrapper hauteur explicite — h-full ne suffit pas dans un grid
                 dont les rows ne sont pas déclarées en CSS */}
-            <div className="col-span-8" style={{ height: 520 }}>
+            <div className="col-span-9" style={{height: 520 }}>
               <LeafletMap
                 gpsData={gpsData}
                 selectedVehicle={selectedVehicle}
@@ -538,7 +597,7 @@ export default function LiveTracking({ customers }: LiveTrackingProps) {
             </div>
 
             {/* Vehicle list */}
-            <div className="col-span-4 rounded-lg border bg-card flex flex-col overflow-hidden" style={{ height: 520 }}>
+            <div className="col-span-3 rounded-lg border bg-card flex flex-col overflow-hidden" style={{ height: 520 }}>
               <div className="px-4 py-3 border-b bg-muted/30 flex-shrink-0">
                 <p className="text-sm font-semibold">{gpsData.length} {t.vehicule.pagination.title}</p>
               </div>
@@ -613,17 +672,32 @@ export default function LiveTracking({ customers }: LiveTrackingProps) {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+                <div className="grid grid-cols-3 sm:grid-cols-3 gap-3">
                   <InfoBox label="Vitesse">{parseFloat(selectedVehicle.speed)} km/h</InfoBox>
                   <InfoBox label="Kilométrage">
                     {parseFloat(selectedVehicle.odometer).toLocaleString("fr-FR", { maximumFractionDigits: 0 })} km
                   </InfoBox>
-                  <InfoBox label="Batterie">
-                    {Math.min(100, parseInt(selectedVehicle.params?.batl ?? "0") * (100 / 6))}%
-                  </InfoBox>
-                  <InfoBox label="GPS">{selectedVehicle.params?.gpslev ?? "—"}/15</InfoBox>
-                  <InfoBox label="GSM">{selectedVehicle.params?.gsmlev ?? "—"}/4</InfoBox>
                   <InfoBox label="Dernier signal">{formatLastSeen(selectedVehicle.dt_server, language)}</InfoBox>
+                </div>
+                
+                <div className="mt-3 flex items-start gap-3 rounded-md bg-muted/50 p-3 border">
+                  <div className="w-8 h-8 rounded-md bg-blue-50 dark:bg-blue-950 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <MapPin className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  {locationLoading ? (
+                    <div className="space-y-1.5 flex-1">
+                      <div className="h-3 w-48 rounded bg-muted animate-pulse" />
+                      <div className="h-2.5 w-32 rounded bg-muted animate-pulse" />
+                    </div>
+                  ) : location ? (
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium leading-snug truncate">{location.display}</p>
+                      <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5">{location.road}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{location.city} · {location.raw}</p>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground mt-1">Position non disponible</p>
+                  )}
                 </div>
 
                 {selectedVehicle.custom_fields?.length > 0 && (
