@@ -97,17 +97,6 @@ const STATUS_COLORS: Record<VehicleStatus, string> = {
   offline: "#f59e0b", 
 };
 
-// const formatLastSeen = (dtStr: string): string => {
-//   if (!dtStr || dtStr === "0000-00-00 00:00:00") return "—";
-//   const diff = Date.now() - new Date(dtStr).getTime();
-//   const m = Math.floor(diff / 60000);
-//   if (m < 1) return "À l'instant";
-//   if (m < 60) return `Il y a ${m}m`;
-//   const h = Math.floor(m / 60);
-//   if (h < 24) return `Il y a ${h}h`;
-//   return `Il y a ${Math.floor(h / 24)}j`;
-// };
-
 const formatLastSeen = (dtStr: string, lang: "fr" | "en" = "fr"): string => {
   if (!dtStr || dtStr === "0000-00-00 00:00:00") return "—";
 
@@ -357,56 +346,73 @@ interface LiveTrackingProps {
   customers: Customer[];
 }
 
-// Hook reverse geocoding
-function useReverseGeocode(lat?: string | number, lng?: string | number) {
-  const [location, setLocation] = useState<{
-    display: string;
-    road: string;
-    city: string;
-    raw: string;
-  } | null>(null);
-  const [locationLoading, setLocationLoading] = useState(false);
+  // Hook reverse geocoding
+  function useReverseGeocode(lat?: string | number, lng?: string | number) {
+    const PICKPOINT_API_KEY = import.meta.env.VITE_PICKPOINT_API_KEY;
+    const PICKPOINT_API_URL = import.meta.env.VITE_PICKPOINT_API_URL;
+    const [location, setLocation] = useState<{
+      display: string;
+      road: string;
+      city: string;
+      raw: string;
+    } | null>(null);
+    const [locationLoading, setLocationLoading] = useState(false);
 
-  useEffect(() => {
-    // Guard : si pas de coords, reset et sortie
-    if (!lat || !lng) {
-      setLocation(null);
-      return;
-    }
-
-    const controller = new AbortController();
-    setLocationLoading(true);
-
-    fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=fr`,
-      {
-        signal: controller.signal,
-        headers: { "User-Agent": "VehicleTracker/1.0" },
+    useEffect(() => {
+      if (!lat || !lng) {
+        setLocation(null);
+        return;
       }
-    )
-      .then((r) => r.json())
-      .then((data) => {
-        const a = data.address ?? {};
-        const road = a.road ?? a.highway ?? a.path ?? a.footway ?? "Route inconnue";
-        const ref = a.ref;
-        const roadLabel = ref ? `${ref} — ${road}` : road;
-        const city = a.city ?? a.town ?? a.village ?? a.county ?? a.state ?? "";
 
-        setLocation({
-          display: data.display_name?.split(",").slice(0, 2).join(", ") ?? "",
-          road: roadLabel,
-          city: `${city}${a.country ? `, ${a.country}` : ""}`,
-          raw: `${parseFloat(String(lat)).toFixed(4)}, ${parseFloat(String(lng)).toFixed(4)}`,
-        });
-      })
-      .catch(() => setLocation(null))
-      .finally(() => setLocationLoading(false));
+      const controller = new AbortController();
+      setLocationLoading(true);
 
-    return () => controller.abort();
-  }, [lat, lng]);
+      // ✅ Pickpoint au lieu de Nominatim
+      fetch(
+        `${PICKPOINT_API_URL}/geocode/reverse/?key=${PICKPOINT_API_KEY}&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=fr`,
+        { signal: controller.signal }
+      )
+        .then((r) => r.json())
+        .then((data) => {
+          const a = data.address ?? {};
 
-  return { location, locationLoading };
-}
+          const road = a.road ?? a.highway ?? a.path ?? a.footway ?? "Route inconnue";
+          const ref = a.ref;
+          const roadLabel = ref ? `${ref}, ${road}` : road;
+
+          const parts = [
+            roadLabel,
+            a.suburb ?? a.neighbourhood ?? a.hamlet ?? a.locality,
+            a.city ?? a.town ?? a.village,
+            a.county ?? a.state_district,
+            a.state,
+            a.country,
+          ]
+            .filter(Boolean)
+            .join(", ");
+
+          setLocation({
+            display: parts,
+            road: roadLabel,
+            city: [
+              a.city ?? a.town ?? a.village,
+              a.county ?? a.state_district,
+              a.state,
+              a.country,
+            ]
+              .filter(Boolean)
+              .join(", "),
+            raw: `${parseFloat(String(lat)).toFixed(4)}, ${parseFloat(String(lng)).toFixed(4)}`,
+          });
+        })
+        .catch(() => setLocation(null))
+        .finally(() => setLocationLoading(false));
+
+      return () => controller.abort();
+    }, [lat, lng]);
+
+    return { location, locationLoading };
+  }
 
 export default function LiveTracking({ customers }: LiveTrackingProps) {
   const { t, language } = useLanguage();

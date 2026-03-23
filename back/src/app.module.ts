@@ -24,9 +24,12 @@ import { AuditLogInterceptor } from './audit-log/interceptors/audit-log.intercep
 import { AuthGuard } from './auth/guards/auth.guard';
 import { AuditLog } from './audit-log/entity/audit-log.entity';
 import { GpsModule } from './gps/gps.module';
+import { Gps } from './gps/entity/gps.entity';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule], // importe ConfigModule pour l’injection
@@ -38,7 +41,7 @@ import { GpsModule } from './gps/gps.module';
         username: config.get<string>('DB_USERNAME', 'root'), 
         password: config.get<string>('DB_PASSWORD', ''), 
         database: config.get<string>('DB_DATABASE', ''),
-        entities: [User, Role, Permission, Customer, VehiculeType, Vehicule, PasswordResetToken, AuditLog],
+        entities: [User, Role, Permission, Customer, VehiculeType, Vehicule, PasswordResetToken, AuditLog, Gps],
         synchronize: true,
       }),
     }),

@@ -1,15 +1,19 @@
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { vehicles, zones, Vehicle } from '@/data/vehicles';
+import { zones, Vehicle } from '@/data/vehicles';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Car, Bike, Truck, HelpCircle, Wifi, WifiOff, Navigation, Square } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import FleetMap from './FleetMap';
 import VehicleDetails from './VehicleDetails';
+import { useVehicles } from '@/hooks/use-vehicules';
 
 const FleetTab = () => {
   const { t } = useLanguage();
+  const { vehicles, loading, error } = useVehicles();
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
+
+  console.log(vehicles)
 
   const stats = {
     total: vehicles.length,
@@ -20,17 +24,17 @@ const FleetTab = () => {
   };
 
   const typeData = [
-    { name: t.fleet.moto, value: vehicles.filter(v => v.type === 'moto').length, color: 'hsl(var(--fleet-moto))' },
-    { name: t.fleet.car, value: vehicles.filter(v => v.type === 'car').length, color: 'hsl(var(--fleet-car))' },
-    { name: t.fleet.truck, value: vehicles.filter(v => v.type === 'truck').length, color: 'hsl(var(--fleet-truck))' },
-    { name: t.fleet.other, value: vehicles.filter(v => v.type === 'other').length, color: 'hsl(var(--fleet-other))' },
+    { name: t.fleet.moto, value: vehicles.filter(v => v.type === 'Moto').length, color: 'hsl(var(--fleet-moto))' },
+    { name: t.fleet.car, value: vehicles.filter(v => v.type === 'Camion').length, color: 'hsl(var(--fleet-car))' },
+    { name: t.fleet.truck, value: vehicles.filter(v => v.type === 'Engin').length, color: 'hsl(var(--fleet-truck))' },
+    { name: t.fleet.other, value: vehicles.filter(v => v.type === 'Voiture légère').length, color: 'hsl(var(--fleet-other))' },
   ];
 
-  const zoneData = zones.map(zone => ({
-    name: zone.name,
-    value: vehicles.filter(v => v.zone === zone.name).length,
-    color: zone.color,
-  }));
+  // const zoneData = zones.map(zone => ({
+  //   name: zone.name,
+  //   value: vehicles.filter(v => v.zone === zone.name).length,
+  //   color: zone.color,
+  // }));
 
   const kpiCards = [
     { label: t.fleet.totalVehicles, value: stats.total, icon: Car, color: 'bg-primary' },
@@ -93,7 +97,7 @@ const FleetTab = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          {/* <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-lg">{t.fleet.byZone}</CardTitle>
             </CardHeader>
@@ -119,7 +123,7 @@ const FleetTab = () => {
                 ))}
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
 
         {/* Map */}

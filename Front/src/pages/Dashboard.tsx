@@ -44,10 +44,10 @@ const Dashboard = () => {
         </TabsList>
 
         <TabsContent value="fleet"><FleetTab /></TabsContent>
-        <TabsContent value="fuel"><FuelTab /></TabsContent>
-        <TabsContent value="alerts"><AlertsTab /></TabsContent>
-        <TabsContent value="maintenance"><MaintenanceTab /></TabsContent>
-        <TabsContent value="analytics"><AnalyticsTab /></TabsContent>
+        {/* <TabsContent value="fuel"><FuelTab /></TabsContent> */}
+        {/* <TabsContent value="alerts"><AlertsTab /></TabsContent> */}
+        {/* <TabsContent value="maintenance"><MaintenanceTab /></TabsContent> */}
+        {/* <TabsContent value="analytics"><AnalyticsTab /></TabsContent> */}
       </Tabs>
     </div>
   );

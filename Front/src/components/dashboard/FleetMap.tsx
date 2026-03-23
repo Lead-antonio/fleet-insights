@@ -54,14 +54,10 @@ const MapController = ({ selectedVehicle }: { selectedVehicle: Vehicle | null })
 
       
 const FleetMap = ({ vehicles, onVehicleClick, selectedVehicle }: FleetMapProps) => {
-  const center: [number, number] = [32.5, -6.5]; // Center of Morocco
+  const center: [number, number] = [-18.7669, 46.8691]; // Center of Morocco
   
   return (
     <MapContainer center={center} zoom={6} className="h-full w-full rounded-lg">
-      {/* <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      /> */}
       <TileLayer
         attribution='&copy; OpenStreetMap France | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png"
